@@ -2,6 +2,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version '3.4.3'
     id 'io.spring.dependency-management' version '1.1.7'
+    id 'com.google.protobuf' version '0.9.4'
 }
 
 group = 'com.cs301'
@@ -17,11 +18,19 @@ repositories {
     mavenCentral()
 }
 
+protobuf {
+    protoc {
+        artifact = 'com.google.protobuf:protoc:4.29.0'
+    }
+}
+
 ext {
     set('springCloudVersion', "2024.0.0")
 }
 
 dependencies {
+    implementation 'com.google.protobuf:protobuf-java:4.29.3'
+    runtimeOnly 'com.google.protobuf:protobuf-java-util:4.29.3'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-authorization-server'
