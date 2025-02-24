@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package com.cs301.crm.protobuf;
+
+/*
+ This file defines the role in our CRM system.
+  1. Admin: Used for account management. Root administrator cannot be deleted.
+            Other admins can be created and deleted as necessary.
+  2. Agent: User of the system. Creates client profiles and accounts.
+            Have only access to their own clients
+ */
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  USER_ROLE_ADMIN = 1;
+  USER_ROLE_AGENT = 2;
+}

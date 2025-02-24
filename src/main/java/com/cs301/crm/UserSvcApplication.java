@@ -1,4 +1,4 @@
-package com.cs301.usersvc;
+package com.cs301.crm;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
