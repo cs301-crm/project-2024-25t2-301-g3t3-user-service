@@ -1,41 +1,31 @@
 package com.cs301.crm.models;
 
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import java.util.Collection;
 import java.util.List;
-import java.util.UUID;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-/**
- * @author: gav
- * @version: 1.0
- * @since: 2024-09-05
- */
-@Entity
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Table(name = "users")
-public class User {
+public class User implements UserDetails {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    private final UserEntity userEntity;
 
-    @Column(unique = true, nullable = false)
-    private String username;
+    public User(UserEntity userEntity) {
+        this.userEntity = userEntity;
+    }
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(userEntity.getUserRole().getAuthority()));
+    }
 
-    @Column(nullable = false)
-    private String password;
+    @Override
+    public String getPassword() {
+        return userEntity.getPassword();
+    }
 
-    @Enumerated(EnumType.STRING)
-    private UserRole userRole;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RefreshToken> refreshTokens;
+    @Override
+    public String getUsername() {
+        return userEntity.getUsername();
+    }
 }
