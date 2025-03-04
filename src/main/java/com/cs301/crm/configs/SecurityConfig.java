@@ -1,10 +1,10 @@
 package com.cs301.crm.configs;
 
-import com.cs203.smucode.services.impl.AuthUserServiceImpl;
-
 import java.util.List;
 
+import com.cs301.crm.services.impl.AuthServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,11 +31,14 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final AuthUserServiceImpl authUserService;
+    @Value("${cors.origins}")
+    private List<String> corsOrigins;
+
+    private final AuthServiceImpl authService;
 
     @Autowired
-    public SecurityConfig(AuthUserServiceImpl authUserService) {
-        this.authUserService = authUserService;
+    public SecurityConfig(AuthServiceImpl authService) {
+        this.authService = authService;
     }
 
     @Bean
@@ -44,9 +47,15 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth ->
                 auth
                         .requestMatchers(
-                                "/api/auth/logout",
-                                "/api/auth/change-password",
-                                "/api/auth/delete-account")
+                            "/api/users/enable",
+                            "/api/users/disable",
+                            "/api/users"
+                        )
+                        .hasAuthority("SCOPE_ROLE_ADMIN")
+                        .requestMatchers(
+                                "/api/users/reset-password",
+                                "/api/auth/logout"
+                        )
                         .authenticated()
                         .anyRequest()
                         .permitAll()
@@ -69,7 +78,7 @@ public class SecurityConfig {
     ) {
         DaoAuthenticationProvider authProvider =
                 new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(authUserService);
+        authProvider.setUserDetailsService(authService);
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
@@ -84,10 +93,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of(
-                "http://localhost:3000",
-                "http://localhost:9000",
-                "https://brawlcode.com"));
+        configuration.setAllowedOrigins(corsOrigins);
         configuration.setAllowCredentials(true); //Allow credentials (cookies, etc.)
         configuration.setAllowedMethods(List.of("*"));
         configuration.setAllowedHeaders(List.of("*"));
