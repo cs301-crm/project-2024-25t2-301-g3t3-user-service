@@ -23,21 +23,18 @@ import java.time.ZonedDateTime;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final UserEntityMapper userEntityMapper;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
-                           UserEntityMapper userEntityMapper,
                            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.userEntityMapper = userEntityMapper;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
     public GenericResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) {
-        UserEntity userEntity = userEntityMapper.createUserRequestDTOtoUserEntity(createUserRequestDTO);
+        UserEntity userEntity = UserEntityMapper.INSTANCE.createUserRequestDTOtoUserEntity(createUserRequestDTO);
         userEntity.setEnabled(true);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         userRepository.save(userEntity);
@@ -50,7 +47,7 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public GenericResponseDTO toggleEnable(DisableEnableRequestDTO disableEnableRequestDTO, boolean enable) {
         UserEntity userEntity = userRepository.findByUsername(disableEnableRequestDTO.username()).orElseThrow(
-                () -> new UsernameNotFoundException("User not found" + disableEnableRequestDTO.username())
+                () -> new UsernameNotFoundException("User not found " + disableEnableRequestDTO.username())
         );
         userEntity.setEnabled(enable);
         userRepository.save(userEntity);
@@ -65,13 +62,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public GenericResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO) {
         UserEntity oldUserEntity = userRepository.findByUsername(updateUserRequestDTO.username()).orElseThrow(
-                () -> new UsernameNotFoundException("User not found" + updateUserRequestDTO.username())
+                () -> new UsernameNotFoundException("User not found " + updateUserRequestDTO.username())
         );
         oldUserEntity.setFirstName(updateUserRequestDTO.firstName());
         oldUserEntity.setLastName(updateUserRequestDTO.lastName());
         oldUserEntity.setUsername(updateUserRequestDTO.username());
         oldUserEntity.setEmail(updateUserRequestDTO.email());
-        oldUserEntity.setUserRole(UserRole.valueOf(updateUserRequestDTO.role()));
+        oldUserEntity.setUserRole(UserRole.valueOf(updateUserRequestDTO.userRole()));
 
         userRepository.save(oldUserEntity);
 
@@ -83,7 +80,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public GenericResponseDTO resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
         UserEntity userEntity = userRepository.findByUsername(resetPasswordRequestDTO.username()).orElseThrow(
-                () -> new UsernameNotFoundException("User not found" + resetPasswordRequestDTO.username())
+                () -> new UsernameNotFoundException("User not found " + resetPasswordRequestDTO.username())
         );
 
         if (!passwordEncoder.matches(
