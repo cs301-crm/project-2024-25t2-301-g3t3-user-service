@@ -23,34 +23,34 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<GenericResponseDTO> create(@RequestBody CreateUserRequestDTO createUserRequestDTO) {
+    public ResponseEntity<GenericResponseDTO> create(@RequestBody @Valid CreateUserRequestDTO createUserRequestDTO) {
         return new ResponseEntity<>(userService.createUser(createUserRequestDTO), HttpStatus.CREATED);
     }
 
     @PatchMapping("/disable")
     public ResponseEntity<GenericResponseDTO> disable(
-            @Valid DisableEnableRequestDTO disableEnableRequestDTO
+            @RequestBody @Valid DisableEnableRequestDTO disableEnableRequestDTO
     ) {
         return ResponseEntity.ok(userService.toggleEnable(disableEnableRequestDTO, false));
     }
 
     @PatchMapping("/enable")
     public ResponseEntity<GenericResponseDTO> enable(
-            @Valid DisableEnableRequestDTO disableEnableRequestDTO
+            @RequestBody @Valid DisableEnableRequestDTO disableEnableRequestDTO
     ) {
         return ResponseEntity.ok(userService.toggleEnable(disableEnableRequestDTO, true));
     }
 
     @PutMapping
     public ResponseEntity<GenericResponseDTO> update(
-            UpdateUserRequestDTO updateUserRequestDTO
+            @RequestBody @Valid UpdateUserRequestDTO updateUserRequestDTO
     ) {
         return ResponseEntity.ok(userService.updateUser(updateUserRequestDTO));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<GenericResponseDTO> resetPassword(
-            ResetPasswordRequestDTO resetPasswordRequestDTO
+            @RequestBody @Valid ResetPasswordRequestDTO resetPasswordRequestDTO
     ) {
         return ResponseEntity.ok(userService.resetPassword(resetPasswordRequestDTO));
     }

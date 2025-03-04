@@ -23,6 +23,6 @@ public record UpdateUserRequestDTO(
 
         @NotNull(message = "Role cannot be null")
         @NotEmpty(message = "Role cannot be empty")
-        String role
+        String userRole
 )
 {}
