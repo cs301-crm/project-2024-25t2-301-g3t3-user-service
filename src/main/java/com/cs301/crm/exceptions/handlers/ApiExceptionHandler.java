@@ -1,5 +1,6 @@
 package com.cs301.crm.exceptions.handlers;
 
+import com.cs301.crm.exceptions.InvalidTokenException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +55,24 @@ public class ApiExceptionHandler {
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(value = {Exception.class})
+    public ResponseEntity<ErrorResponse> handleException() {
+        return new ResponseEntity<>(
+                new ErrorResponse("Something went wrong on our end.",
+                        HttpStatus.SERVICE_UNAVAILABLE,
+                        ZonedDateTime.now()
+                ), HttpStatus.SERVICE_UNAVAILABLE);
+    }
+
+    @ExceptionHandler(value = {InvalidTokenException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidTokenException e) {
+        return new ResponseEntity<>(
+                new ErrorResponse(e.getMessage(),
+                        HttpStatus.UNAUTHORIZED,
+                        ZonedDateTime.now()
+                ), HttpStatus.UNAUTHORIZED);
     }
 
 
