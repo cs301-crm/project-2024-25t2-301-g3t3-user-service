@@ -34,7 +34,7 @@ public class JwtUtil {
     private final JwtEncoder jwtEncoder;
 
     @Autowired
-    public JWTUtil(JwtEncoder jwtEncoder, RSAKey rsaKey) {
+    public JwtUtil(JwtEncoder jwtEncoder, RSAKey rsaKey) {
         this.jwtEncoder = jwtEncoder;
         this.rsaKey = rsaKey;
     }

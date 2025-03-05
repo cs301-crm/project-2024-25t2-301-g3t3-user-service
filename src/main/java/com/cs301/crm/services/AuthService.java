@@ -6,6 +6,5 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface AuthService {
     GenericResponseDTO login(LoginRequestDTO loginRequestDTO);
-    UserDetails loadUserByUsername(String username);
     String generateAccessToken(UserDetails userDetails);
 }

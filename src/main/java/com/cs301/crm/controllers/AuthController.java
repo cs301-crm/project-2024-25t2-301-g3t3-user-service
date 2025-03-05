@@ -8,10 +8,12 @@ import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.services.AuthService;
 import com.cs301.crm.services.TokenService;
 import com.cs301.crm.utils.CookieUtil;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -24,19 +26,21 @@ public class AuthController {
     private final AuthService authService;
     private final CookieUtil cookieUtil;
     private final TokenService tokenService;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
     public AuthController(AuthService authService,
                           CookieUtil cookieUtil,
-                          TokenService tokenService) {
+                          TokenService tokenService, UserDetailsService userDetailsService) {
         this.authService = authService;
         this.cookieUtil = cookieUtil;
         this.tokenService = tokenService;
+        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<GenericResponseDTO> login(
-            @RequestBody LoginRequestDTO loginRequestDTO
+            @RequestBody @Valid LoginRequestDTO loginRequestDTO
     ) {
         GenericResponseDTO response = authService.login(loginRequestDTO);
         String refreshToken = tokenService.createRefreshToken(loginRequestDTO.username());
@@ -86,7 +90,7 @@ public class AuthController {
         UserEntity user = refreshToken.getUser();
 
         String accessToken = authService.generateAccessToken(
-                authService.loadUserByUsername(user.getUsername())
+                userDetailsService.loadUserByUsername(user.getUsername())
         );
 
         ResponseCookie accessCookie = cookieUtil.buildAccessToken(accessToken);

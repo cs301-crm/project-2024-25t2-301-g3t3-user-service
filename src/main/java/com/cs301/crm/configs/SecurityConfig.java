@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -34,11 +35,11 @@ public class SecurityConfig {
     @Value("${cors.origin}")
     private List<String> corsOrigins;
 
-    private final AuthServiceImpl authService;
+    private final UserDetailsService userDetailsService;
 
     @Autowired
-    public SecurityConfig(AuthServiceImpl authService) {
-        this.authService = authService;
+    public SecurityConfig(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 
     @Bean
@@ -48,8 +49,8 @@ public class SecurityConfig {
                 auth
                         .requestMatchers(
                             "/api/users/enable",
-                            "/api/users/disable",
-                            "/api/users"
+                            "/api/users/disable"
+//                            "/api/users"
                         )
                         .hasAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(
@@ -78,7 +79,7 @@ public class SecurityConfig {
     ) {
         DaoAuthenticationProvider authProvider =
                 new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(authService);
+        authProvider.setUserDetailsService(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
