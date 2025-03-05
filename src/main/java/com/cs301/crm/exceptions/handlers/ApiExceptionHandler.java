@@ -1,5 +1,6 @@
 package com.cs301.crm.exceptions.handlers;
 
+import com.cs301.crm.exceptions.AwsException;
 import com.cs301.crm.exceptions.InvalidTokenException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {UsernameNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleUsernameDoesNotExist(UsernameNotFoundException e) {
         return new ResponseEntity<>(
-                new ErrorResponse(e.getMessage(),
+                new ErrorResponse("Username " + e.getMessage() + " not found",
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
@@ -58,7 +59,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {Exception.class})
+    @ExceptionHandler(value = {Exception.class, AwsException.class, })
     public ResponseEntity<ErrorResponse> handleException() {
         return new ResponseEntity<>(
                 new ErrorResponse("Something went wrong on our end.",

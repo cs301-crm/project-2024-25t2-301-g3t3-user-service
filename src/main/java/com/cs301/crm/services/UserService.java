@@ -8,7 +8,7 @@ import com.cs301.crm.dtos.responses.GenericResponseDTO;
 
 public interface UserService {
     GenericResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO);
-    GenericResponseDTO toggleEnable(DisableEnableRequestDTO disableEnableRequestDTO, boolean enable);;
+    GenericResponseDTO toggleEnable(DisableEnableRequestDTO disableEnableRequestDTO, boolean enable);
     GenericResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO);
     GenericResponseDTO resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO);
 }

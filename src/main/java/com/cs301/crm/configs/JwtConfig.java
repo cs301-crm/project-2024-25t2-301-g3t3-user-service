@@ -1,11 +1,15 @@
 package com.cs301.crm.configs;
 
 
+import com.cs301.crm.exceptions.AwsException;
+import com.cs301.crm.exceptions.JwtCreationException;
 import com.cs301.crm.utils.AwsUtil;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,6 +28,8 @@ import java.util.Base64;
 
 @Configuration
 public class JwtConfig {
+    private Logger logger = LoggerFactory.getLogger(JwtConfig.class);
+
     @Value("${jwt.id}")
     private String keyId;
 
@@ -39,14 +45,14 @@ public class JwtConfig {
     }
 
     @Bean
-    public RSAPrivateKey RSAPrivateKey(AwsUtil awsUtil) {
+    public RSAPrivateKey RsaPrivateKey(AwsUtil awsUtil) {
         try {
             String privateKeyStr = awsUtil.getValueFromSecretsManager(
                     "JWTPrivateKey"
             );
 
             if (privateKeyStr == null) {
-                throw new RuntimeException("JWT Private Key not found");
+                throw new AwsException("JWT Private Key not found");
             }
 
             byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyStr);
@@ -60,9 +66,11 @@ public class JwtConfig {
 
             return (RSAPrivateKey) privateKey;
         } catch (InvalidKeySpecException e) {
-            throw new RuntimeException("Invalid private key specification", e);
+            logger.error(e.getMessage());
+            throw new JwtCreationException("Invalid private key specification", e);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("RSA algorithm not available", e);
+            logger.error(e.getMessage());
+            throw new JwtCreationException("RSA algorithm not available", e);
         }
     }
 

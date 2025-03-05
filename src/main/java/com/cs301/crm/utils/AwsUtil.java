@@ -1,7 +1,11 @@
 package com.cs301.crm.utils;
 
+import com.cs301.crm.exceptions.AwsException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.core.exception.SdkException;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
@@ -16,6 +20,7 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRespon
  */
 @Component
 public class AwsUtil {
+    private Logger logger = LoggerFactory.getLogger(AwsUtil.class);
     public String getValueFromSecretsManager(
             String secretName
     ) {
@@ -32,7 +37,8 @@ public class AwsUtil {
         try {
             secretValueResponse = client.getSecretValue(secretValueRequest);
         } catch (SdkException e) {
-            throw new RuntimeException("Failed to get secret value", e);
+            logger.error(e.getMessage());
+            throw new AwsException("Failed to get secret value");
         }
 
         if (secretValueResponse == null) {
