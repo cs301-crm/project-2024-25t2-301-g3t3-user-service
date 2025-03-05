@@ -45,7 +45,7 @@ public class JwtConfig {
     }
 
     @Bean
-    public RSAPrivateKey RsaPrivateKey(AwsUtil awsUtil) {
+    public RSAPrivateKey rsaPrivateKey(AwsUtil awsUtil) {
         try {
             String privateKeyStr = awsUtil.getValueFromSecretsManager(
                     "JWTPrivateKey"
