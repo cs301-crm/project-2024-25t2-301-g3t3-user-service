@@ -5,6 +5,7 @@ import com.cs301.crm.exceptions.InvalidUserCredentials;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -38,8 +39,8 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {InvalidUserCredentials.class})
-    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidUserCredentials e) {
+    @ExceptionHandler(value = {InvalidUserCredentials.class, BadCredentialsException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(Exception e) {
         return new ResponseEntity<>(
                 new ErrorResponse(e.getMessage(),
                         HttpStatus.UNAUTHORIZED,
