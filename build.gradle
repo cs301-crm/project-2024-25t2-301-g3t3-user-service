@@ -29,7 +29,13 @@ ext {
 }
 
 dependencies {
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
+
     implementation 'com.google.protobuf:protobuf-java:4.29.3'
+    implementation 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
     runtimeOnly 'com.google.protobuf:protobuf-java-util:4.29.3'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
@@ -41,11 +47,14 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j'
     implementation 'org.springframework.kafka:spring-kafka'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-    runtimeOnly 'com.mysql:mysql-connector-j'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation 'org.springframework.security:spring-security-test'
+    runtimeOnly 'org.postgresql:postgresql'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    implementation platform('software.amazon.awssdk:bom:2.30.31') // Use the latest version
+    implementation 'software.amazon.awssdk:secretsmanager'
 }
 
 dependencyManagement {
