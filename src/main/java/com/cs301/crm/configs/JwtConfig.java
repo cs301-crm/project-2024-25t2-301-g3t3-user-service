@@ -1,6 +1,5 @@
 package com.cs301.crm.configs;
 
-
 import com.cs301.crm.exceptions.AwsException;
 import com.cs301.crm.exceptions.JwtCreationException;
 import com.cs301.crm.utils.AwsUtil;
