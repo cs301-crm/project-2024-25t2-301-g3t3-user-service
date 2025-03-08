@@ -2,13 +2,11 @@ name: Commit Stage
 
 on:
   push:
-    branches: [main]
+    branches: ["main"]
   workflow_dispatch:
-    branches: [main]
 
 env:
   VERSION: latest
-  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
   ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}
   IMAGE_TAG: ${{ env.VERSION }}-${{ github.sha }}
 
@@ -52,7 +50,7 @@ jobs:
       - name: Build image based on Dockerfile
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \ 
+            --platform linux/amd64,linux/arm64\ 
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache \
@@ -73,6 +71,8 @@ jobs:
           sarif_file: ${{ steps.scan.outputs.sarif }}
 
       - name: Tag and push image to Amazon ECR
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }}
           
