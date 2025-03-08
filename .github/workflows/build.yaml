@@ -14,7 +14,6 @@ env:
 
 jobs:
   build:
-    name: Test, build and push to ECR
     runs-on: ubuntu-latest
     permissions:
       contents: read # Permission to check out current Git repo

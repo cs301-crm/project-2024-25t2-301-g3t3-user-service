@@ -7,7 +7,6 @@ on:
     branches: "/**"
 
 jobs:
-  name: Run unit and int tests on application
   runs-on: ubuntu-latest
   permissions:
     contents: read
