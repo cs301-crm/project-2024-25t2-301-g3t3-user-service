@@ -3,7 +3,9 @@ package com.cs301.crm.services.impl;
 import com.cs301.crm.dtos.requests.CreateUserRequestDTO;
 import com.cs301.crm.dtos.requests.ResetPasswordRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.mappers.UserEntityMapper;
 import com.cs301.crm.models.UserEntity;
+import com.cs301.crm.models.UserRole;
 import com.cs301.crm.repositories.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,10 +35,19 @@ class UserServiceImplTest {
         // Arrange
         CreateUserRequestDTO request = new CreateUserRequestDTO(
                 "John", "Doe", "johndoe", "john@example.com",
-                "password", "ROLE_USER"
+                "password", "AGENT"
         );
+
+        UserEntity mappedEntity = new UserEntity();
+        mappedEntity.setFirstName("John");
+        mappedEntity.setLastName("Doe");
+        mappedEntity.setUsername("johndoe");
+        mappedEntity.setEmail("john@example.com");
+        mappedEntity.setPassword("password");
+        mappedEntity.setUserRole(UserRole.AGENT);
+
         when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(userRepository.save(any(UserEntity.class))).thenReturn(new UserEntity());
+        when(userRepository.save(any(UserEntity.class))).thenReturn(mappedEntity);
 
         // Act
         GenericResponseDTO response = userService.createUser(request);
