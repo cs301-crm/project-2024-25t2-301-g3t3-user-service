@@ -13,6 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
+      id-token: write # Permission for GA to get AWS OIDC connection
       contents: read # Permission to check out current Git repo
       security-events: write # Permission to submit security events to GitHub
 
