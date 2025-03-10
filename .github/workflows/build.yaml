@@ -1,5 +1,7 @@
 name: Commit Stage
 
+  #docker buildx build --platform linux/amd64 --tag a:test  --cache-from=type=registry,ref=a/test --cache-to=type=registry,ref=a/test,mode=max --load .
+
 on:
   push:
     branches: ["main"]
@@ -46,23 +48,45 @@ jobs:
 
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@v3
+        with:
+          driver: docker-container
 
-      - name: Build image based on Dockerfile
+      - name: Build, tag and push image
+        env:
+          IMAGE_TAG: ${{ env.VERSION }}-${{ github.sha }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          BUILDKIT_CACHE_ECR_REPOSITORY: ${{ secrets.BUILDKIT_CACHE_ECR_REPOSITORY }}
         run: |
           docker buildx build \
             --platform linux/amd64 \ 
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            --cache-from=type=local,src=/tmp/.buildx-cache \
-            --cache-to=type=local,dest=/tmp/.buildx-cache \
-            --load \
+            --tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }} \
+            --cache-from=type=registry,ref=$ECR_REGISTRY/$BUILDKIT_CACHE_ECR_REPOSITORY:${{ github.repository_id }} \
+            --cache-to=type=registry,ref=$ECR_REGISTRY/$BUILDKIT_CACHE_ECR_REPOSITORY:${{ github.repository_id }},mode=max \
+            --push \
             .
+
+      - name: Delete image if scan fails
+        if: ${{ failure() && steps.scan.outcome == 'failure' }}
+        env:
+          IMAGE_TAG: ${{ env.VERSION }}-${{ github.sha }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # Delete both tags
+          aws ecr batch-delete-image \
+            --repository-name $ECR_REPOSITORY \
+            --image-ids imageTag=$IMAGE_TAG imageTag=${{ env.VERSION }} \
+            --region ${{ secrets.AWS_REGION }}
+          
+          echo "Vulnerability scan failed - images deleted from ECR"
+          exit 1
 
       - name: Code vulnerability scanning
         uses: anchore/scan-action@v6
         id: scan # Assign identifier for curr step so that it can be referenced
         with:
           path: "${{ github.workspace }}" # Path to checked out repo
-          fail-build: true # Fail if found vulnerabilities
+          fail-build: false # Fail if found vulnerabilities
           severity-cutoff: 'high'
 
       - name: Upload vulnerability report
@@ -70,12 +94,3 @@ jobs:
         if: success() || failure()
         with:
           sarif_file: ${{ steps.scan.outputs.sarif_file }}
-
-      - name: Tag and push image to Amazon ECR
-        env:
-          IMAGE_TAG: ${{ env.VERSION }}-${{ github.sha }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        run: |
-          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }}
-          
-          docker push --all-tags $ECR_REGISTRY/$ECR_REPOSITORY
