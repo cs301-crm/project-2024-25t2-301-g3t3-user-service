@@ -50,7 +50,7 @@ jobs:
       - name: Build image based on Dockerfile
         run: |
           docker buildx build \
-            --platform linux/amd64,linux/arm64 \ 
+            --platform linux/amd64 \ 
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache \
