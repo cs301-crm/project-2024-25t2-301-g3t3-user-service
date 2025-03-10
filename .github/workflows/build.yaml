@@ -54,7 +54,8 @@ jobs:
             --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             --cache-from=type=local,src=/tmp/.buildx-cache \
             --cache-to=type=local,dest=/tmp/.buildx-cache \
-            --load . 
+            --load \
+            .
 
       - name: Code vulnerability scanning
         uses: anchore/scan-action@v6
