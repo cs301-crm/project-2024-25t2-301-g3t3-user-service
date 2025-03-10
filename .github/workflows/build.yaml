@@ -55,10 +55,9 @@ jobs:
         env:
           IMAGE_TAG: ${{ github.sha }}
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          BUILDKIT_CACHE_ECR_REPOSITORY: ${{ secrets.BUILDKIT_CACHE_ECR_REPOSITORY }}
           REPOSITORY_ID: ${{ github.repository_id }}
         run: |
-          docker buildx build --platform linux/amd64 --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }} --push .
+          docker buildx build --platform linux/amd64 --tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --tag $ECR_REGISTRY/$ECR_REPOSITORY:${{ env.VERSION }}  --cache-from=type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY --cache-to=type=inline --push .
 
       - name: Delete image if scan fails
         if: ${{ failure() && steps.scan.outcome == 'failure' }}
