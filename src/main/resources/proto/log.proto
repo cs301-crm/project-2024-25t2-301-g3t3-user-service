@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package com.cs301.crm;
+
+option java_multiple_files = true;
+option java_package = "com.cs301.crm.protobuf";
+
+// Represents a log message that captures information about a business transaction.
+message Log {
+
+  // Unique identifier for the log message, typically a UUID.
+  // Type: string (UUID in string format)
+  // Example: "123e4567-e89b-12d3-a456-426614174000"
+  string log_id = 1;
+
+  // The HTTP method of the transaction (e.g., "GET", "POST".).
+  // Is converted to human-readable language by a Lambda.
+  // Type: string (Descriptive text of the transaction)
+  string transaction_type = 2;
+
+  // Unique identifier for the actor (person or system performing the action).
+  // Type: string (UUID in string format)
+  // Example: "123e4567-e89b-12d3-a456-426614174001"
+  string actor_id = 3;
+
+  // Username of the actor who performed the transaction.
+  // Type: string (Username associated with the actor)
+  // Example: "john_doe"
+  string actor_username = 4;
+
+  // Unique identifier for the target (person or entity affected by the transaction).
+  // Type: string (UUID in string format)
+  // Example: "123e4567-e89b-12d3-a456-426614174002"
+  string target_id = 5;
+
+  // Username of the target associated with the transaction.
+  // Type: string (Username associated with the target)
+  // Example: "jane_smith"
+  string target_username = 6;
+
+  // Timestamp of when the transaction occurred, in ISO 8601 format (UTC).
+  // Type: string (ISO 8601 format)
+  // Example: "2021-03-11T22:04:16.000Z"
+  string timestamp = 7;
+}
