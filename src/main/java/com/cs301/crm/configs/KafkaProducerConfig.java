@@ -28,7 +28,7 @@ public class KafkaProducerConfig {
     @Value("${kafka.schema.registry}")
     private String schemaRegistry;
 
-    @Value("${kafka.protobuf.log}")
+    @Value("${kafka.schema.protobuf.log}")
     private String protobufLogSchema;
 
     @Bean

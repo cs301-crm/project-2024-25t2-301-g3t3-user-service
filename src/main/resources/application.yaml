@@ -1,16 +1,16 @@
 server:
-  port: 8081
+  port: 8080
 
 spring:
   application:
     name: user-service
   datasource:
-      url: ${SPRING_DATASOURCE_URL:jdbc:h2:~/test;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
-      driverClassName: org.postgresql.Driver
-      username: ${SPRING_DATASOURCE_USERNAME:sa}
-      password: ${SPRING_DATASOURCE_PASSWORD:password}
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:~/test;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
+    driverClassName: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
   jpa:
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    database-platform: ${SPRING_JPA_DIALECT:org.hibernate.dialect.H2Dialect}
     hibernate:
       ddl-auto: ${SPRING_JPA_DDL:create-drop}
   kafka:
