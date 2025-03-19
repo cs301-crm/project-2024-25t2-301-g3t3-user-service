@@ -1,6 +1,5 @@
 package com.cs301.crm.aspects;
 
-import com.cs301.crm.exceptions.AspectExecutionException;
 import com.cs301.crm.producers.LogKafkaProducer;
 import com.cs301.crm.protobuf.Log;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -12,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.*;
@@ -23,22 +23,22 @@ import java.util.UUID;
 
 @Aspect
 @Component
-public class KafkaLogProducerAspect {
+public class LogKafkaProducerAspect {
 
-    private static final Logger logger = LoggerFactory.getLogger(KafkaLogProducerAspect.class);
+    private static final Logger logger = LoggerFactory.getLogger(LogKafkaProducerAspect.class);
 
     private final LogKafkaProducer logKafkaProducer;
 
     @Autowired
-    public KafkaLoggingAspect(LogKafkaProducer logKafkaProducer) {
+    public LogKafkaProducerAspect(LogKafkaProducer logKafkaProducer) {
         this.logKafkaProducer = logKafkaProducer;
     }
 
     @Around("execution(* com.cs301.crm.controllers..*(..))")
     public Object produce(ProceedingJoinPoint joinPoint) throws Throwable {
-        try {
+//        try {
             Object result = joinPoint.proceed();
-            logger.info("Initial method executed successfully.")
+            logger.info("Initial method executed successfully.");
             // Get the method being called
             Method method = getTargetMethod(joinPoint);
 
@@ -49,15 +49,24 @@ public class KafkaLogProducerAspect {
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-            if (authentication == null || authentication.isAuthenticated()) {
+            logger.info("{}, {}, {}", annotationType, methodName, authentication);
+
+            if (authentication == null || !authentication.isAuthenticated()) {
                 return result;
             }
 
-            if (!(authentication.getPrincipal() instanceof UserDetails userDetails)) {
+            logger.info("User is authenticated, logging action");
+            String username;
+
+            if (authentication.getPrincipal() instanceof Jwt jwt) {
+                username = jwt.getClaimAsString("sub");
+            } else if (authentication.getPrincipal() instanceof UserDetails userDetails) {
+                username = userDetails.getUsername();
+            } else {
                 return result;
             }
 
-            String username = userDetails.getUsername();
+            logger.info("{} has accessed the resource", username);
 
             Log logMessage = Log.newBuilder()
                     .setLogId(UUID.randomUUID().toString())
@@ -67,12 +76,12 @@ public class KafkaLogProducerAspect {
                     .setTimestamp(Instant.now().toString())
                     .build();
 
-            logger.info("Pushing message to Kafka");
+            logger.info("Pushing log to Kafka");
             logKafkaProducer.produceMessage(logMessage);
             return result;
-        } catch (Exception e) {
-            throw new AspectExecutionException(e.getMessage());
-        }
+//        }  catch (Exception e) {
+//            throw new AspectExecutionException(e.getMessage());
+//        }
     }
 
     // Utility to get the actual method being called

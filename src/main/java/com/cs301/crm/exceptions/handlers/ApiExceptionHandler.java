@@ -59,7 +59,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {Exception.class, AwsException.class, })
+    @ExceptionHandler(value = {Exception.class, AwsException.class})
     public ResponseEntity<ErrorResponse> handleException() {
         return new ResponseEntity<>(
                 new ErrorResponse("Something went wrong on our end.",
