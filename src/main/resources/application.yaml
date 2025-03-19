@@ -5,9 +5,9 @@ spring:
   application:
     name: user-service
   datasource:
-      url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/user-db}
+      url: ${SPRING_DATASOURCE_URL:jdbc:h2:~/test;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE}
       driverClassName: org.postgresql.Driver
-      username: ${SPRING_DATASOURCE_USERNAME:postgres}
+      username: ${SPRING_DATASOURCE_USERNAME:sa}
       password: ${SPRING_DATASOURCE_PASSWORD:password}
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
