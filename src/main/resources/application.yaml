@@ -1,24 +1,28 @@
 server:
-  port: 8000
+  port: 8081
 
 spring:
   application:
     name: user-service
   datasource:
-    primary:
       url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/user-db}
       driverClassName: org.postgresql.Driver
       username: ${SPRING_DATASOURCE_USERNAME:postgres}
       password: ${SPRING_DATASOURCE_PASSWORD:password}
-    backup:
-      url: jdbc:h2:mem:fallbackdb;DB_CLOSE_DELAY=-1
-      username: sa
-      password:
-      driver-class-name: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: ${SPRING_JPA_DDL:create-drop}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+
+kafka:
+  topic:
+    log: ${KAFKA_LOG_TOPIC:logs}
+  schema:
+    registry: ${KAFKA_REGISTRY:scrooge-bank-registry}
+    protobuf:
+      log: ${KAFKA_PROTOBUF_LOG:log.proto}
 
 cors:
   origin: ${CORS_ORIGIN:http://localhost:9000}
