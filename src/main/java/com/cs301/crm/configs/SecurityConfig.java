@@ -2,7 +2,6 @@ package com.cs301.crm.configs;
 
 import java.util.List;
 
-import com.cs301.crm.services.impl.AuthServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -49,8 +48,8 @@ public class SecurityConfig {
                 auth
                         .requestMatchers(
                             "/api/users/enable",
-                            "/api/users/disable"
-//                            "/api/users"
+                            "/api/users/disable",
+                            "/api/users"
                         )
                         .hasAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(
