@@ -3,6 +3,7 @@ package com.cs301.crm.exceptions.handlers;
 import com.cs301.crm.exceptions.AwsException;
 import com.cs301.crm.exceptions.InvalidTokenException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
+import com.cs301.crm.exceptions.JwtCreationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -59,7 +60,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {Exception.class, AwsException.class})
+    @ExceptionHandler(value = {Exception.class, AwsException.class, JwtCreationException.class})
     public ResponseEntity<ErrorResponse> handleException() {
         return new ResponseEntity<>(
                 new ErrorResponse("Something went wrong on our end.",

@@ -36,7 +36,6 @@ public class LogKafkaProducerAspect {
 
     @Around("execution(* com.cs301.crm.controllers..*(..))")
     public Object produce(ProceedingJoinPoint joinPoint) throws Throwable {
-//        try {
             Object result = joinPoint.proceed();
             logger.info("Initial method executed successfully.");
             // Get the method being called
@@ -79,9 +78,6 @@ public class LogKafkaProducerAspect {
             logger.info("Pushing log to Kafka");
             logKafkaProducer.produceMessage(logMessage);
             return result;
-//        }  catch (Exception e) {
-//            throw new AspectExecutionException(e.getMessage());
-//        }
     }
 
     // Utility to get the actual method being called

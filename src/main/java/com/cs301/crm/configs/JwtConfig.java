@@ -65,10 +65,8 @@ public class JwtConfig {
 
             return (RSAPrivateKey) privateKey;
         } catch (InvalidKeySpecException e) {
-            logger.error(e.getMessage());
             throw new JwtCreationException("Invalid private key specification", e);
         } catch (NoSuchAlgorithmException e) {
-            logger.error(e.getMessage());
             throw new JwtCreationException("RSA algorithm not available", e);
         }
     }
