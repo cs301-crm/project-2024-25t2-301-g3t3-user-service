@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.ZonedDateTime;
+import java.util.concurrent.ExecutionException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -49,6 +50,16 @@ public class ApiExceptionHandler {
                         ZonedDateTime.now()
                 ), HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(value = {ExecutionException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidOtpRequest(Exception e) {
+        return new ResponseEntity<>(
+                new ErrorResponse("Invalid OTP request",
+                        HttpStatus.BAD_REQUEST,
+                        ZonedDateTime.now()
+                ), HttpStatus.BAD_REQUEST);
+    }
+
 
     @ExceptionHandler(value = {HttpMessageNotReadableException.class, IllegalArgumentException.class})
     public ResponseEntity<ErrorResponse> handleBlankRequests() {
