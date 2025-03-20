@@ -36,6 +36,7 @@ public class JwtConfig {
     public RSAPublicKey rsaPublicKey(
             @Value("${jwt.public.key}") String publicKeyString
     ) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        logger.info("Generating RSA Public Key");
         byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyString);
         KeyFactory keyFactory = KeyFactory.getInstance("RSA");
         return (RSAPublicKey) keyFactory.generatePublic(
@@ -46,6 +47,7 @@ public class JwtConfig {
     @Bean
     public RSAPrivateKey rsaPrivateKey(AwsUtil awsUtil) {
         try {
+            logger.info("Fetching key from AWS");
             String privateKeyStr = awsUtil.getValueFromSecretsManager(
                     "JWTPrivateKey"
             );
@@ -62,7 +64,7 @@ public class JwtConfig {
 
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             PrivateKey privateKey = keyFactory.generatePrivate(privateKeySpec);
-
+            logger.info("Private Key generated successfully");
             return (RSAPrivateKey) privateKey;
         } catch (InvalidKeySpecException e) {
             throw new JwtCreationException("Invalid private key specification", e);
