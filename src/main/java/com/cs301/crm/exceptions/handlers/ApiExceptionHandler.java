@@ -1,9 +1,6 @@
 package com.cs301.crm.exceptions.handlers;
 
-import com.cs301.crm.exceptions.AwsException;
-import com.cs301.crm.exceptions.InvalidTokenException;
-import com.cs301.crm.exceptions.InvalidUserCredentials;
-import com.cs301.crm.exceptions.JwtCreationException;
+import com.cs301.crm.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -51,6 +48,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.UNAUTHORIZED);
     }
 
+    // This is for if the OTP does not exist in the cache (means stale, or something went wrong)
     @ExceptionHandler(value = {ExecutionException.class})
     public ResponseEntity<ErrorResponse> handleInvalidOtpRequest(Exception e) {
         return new ResponseEntity<>(
@@ -58,6 +56,16 @@ public class ApiExceptionHandler {
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
+    }
+
+    // This is for if the OTP value is wrong, but OTP correct number does exist in the cache
+    @ExceptionHandler(value = {InvalidOtpException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidOtpSubmission(Exception e) {
+        return new ResponseEntity<>(
+                new ErrorResponse(e.getMessage(),
+                        HttpStatus.UNAUTHORIZED,
+                        ZonedDateTime.now()
+                ), HttpStatus.UNAUTHORIZED);
     }
 
 

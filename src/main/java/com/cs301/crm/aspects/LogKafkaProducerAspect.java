@@ -54,7 +54,6 @@ public class LogKafkaProducerAspect {
                 return result;
             }
 
-            logger.info("User is authenticated, logging action");
             String username;
 
             if (authentication.getPrincipal() instanceof Jwt jwt) {
@@ -64,8 +63,6 @@ public class LogKafkaProducerAspect {
             } else {
                 return result;
             }
-
-            logger.info("{} has accessed the resource", username);
 
             Log logMessage = Log.newBuilder()
                     .setLogId(UUID.randomUUID().toString())

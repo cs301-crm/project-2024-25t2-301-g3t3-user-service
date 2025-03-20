@@ -2,6 +2,7 @@ package com.cs301.crm.services.impl;
 
 import com.cs301.crm.dtos.requests.*;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.exceptions.InvalidOtpException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
 import com.cs301.crm.mappers.UserEntityMapper;
 import com.cs301.crm.models.UserEntity;
@@ -9,6 +10,8 @@ import com.cs301.crm.models.UserRole;
 import com.cs301.crm.repositories.UserRepository;
 import com.cs301.crm.services.UserService;
 import com.google.common.cache.LoadingCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,6 +24,8 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class UserServiceImpl implements UserService {
+    private Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final LoadingCache<String, Integer> oneTimePasswordCache;
@@ -42,11 +47,14 @@ public class UserServiceImpl implements UserService {
         userEntity.setEnabled(false);
         userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
         userRepository.save(userEntity);
+        logger.info("Saved {} into the database", userEntity);
 
         oneTimePasswordCache.invalidate(username);
         final int otp = new Random().ints(1, 100000, 999999).sum();
         oneTimePasswordCache.put(username, otp);
+        logger.info("Generated {}", otp);
 
+        logger.info("Sent email generation message to Kafka");
         return new GenericResponseDTO(
                 true, "User saved successfully, please verify account creation with OTP sent to the email", ZonedDateTime.now()
         );
@@ -78,13 +86,14 @@ public class UserServiceImpl implements UserService {
         Integer storedOneTimePassword = oneTimePasswordCache.get(username);
 
         if (!storedOneTimePassword.equals(otpVerificationDTO.oneTimePassword())) {
-            return new GenericResponseDTO(
-                    false, "2FA verification unsuccessful", ZonedDateTime.now()
-            );
+            throw new InvalidOtpException("OTP value is wrong. Please try again");
         }
+
         userEntity.setEmailVerified(true);
         userEntity.setEnabled(true);
         userRepository.save(userEntity);
+
+        logger.info("2FA passed, enabled {}", userEntity);
 
         return new GenericResponseDTO(
                 true, "2FA verification successful", ZonedDateTime.now()
