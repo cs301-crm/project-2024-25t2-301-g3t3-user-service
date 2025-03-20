@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,4 +48,15 @@ public class UserEntity {
 
     @Column(nullable = false)
     private boolean enabled;
+
+    @Column(name = "email_verified", nullable = false)
+    private boolean isEmailVerified;
+
+    @Column(name = "created_at", nullable = false)
+    private Instant createdAt;
+
+    @PrePersist
+    void setUp() {
+        this.createdAt = Instant.now();
+    }
 }
