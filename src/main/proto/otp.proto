@@ -3,7 +3,7 @@ syntax = "proto3";
 package com.cs301.crm;
 
 option java_multiple_files = true;
-option java_outer_classname = "com.cs301.crm";
+option java_package = "com.cs301.crm.protobuf";
 
 message Otp {
 
@@ -12,7 +12,7 @@ message Otp {
   // Example: "john@scrooge-bank.com"
   string email = 1;
 
-  // Email of when the user that performed a dangerous method (disable, enable, create)
+  // OTP to validate against
   // Type: uint32 (unsigned int, only positive)
   // Example: "john@scrooge-bank.com"
   uint32 otp = 2;
