@@ -18,6 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.time.ZonedDateTime;
 import java.util.Random;
 import java.util.concurrent.ExecutionException;
@@ -50,7 +51,7 @@ public class UserServiceImpl implements UserService {
         logger.info("Saved {} into the database", userEntity);
 
         oneTimePasswordCache.invalidate(username);
-        final int otp = new Random().ints(1, 100000, 999999).sum();
+        final int otp = new SecureRandom().nextInt(900000) + 100000;
         oneTimePasswordCache.put(username, otp);
         logger.info("Generated {}", otp);
 
