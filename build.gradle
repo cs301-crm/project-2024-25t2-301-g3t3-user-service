@@ -37,6 +37,7 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
 //    implementation 'com.google.protobuf:protobuf-java:3.25.5'
+    implementation 'com.google.guava:guava:33.4.0-jre'
     implementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 //    runtimeOnly 'com.google.protobuf:protobuf-java-util:3.25.5'
