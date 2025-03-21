@@ -26,9 +26,6 @@ public class KafkaProducerConfig {
     @Value("${kafka.schema.registry}")
     private String schemaRegistry;
 
-    @Value("${kafka.schema.protobuf.log}")
-    private String protobufLogSchema;
-
     @Bean
     public ProducerFactory<String, Log> producerFactory() {
         Map<String, Object> props = new HashMap<>();
