@@ -1,6 +1,6 @@
 package com.cs301.crm.aspects;
 
-import com.cs301.crm.producers.LogKafkaProducer;
+import com.cs301.crm.producers.KafkaProducer;
 import com.cs301.crm.protobuf.Log;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -27,11 +27,11 @@ public class LogKafkaProducerAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LogKafkaProducerAspect.class);
 
-    private final LogKafkaProducer logKafkaProducer;
+    private final KafkaProducer KafkaProducer;
 
     @Autowired
-    public LogKafkaProducerAspect(LogKafkaProducer logKafkaProducer) {
-        this.logKafkaProducer = logKafkaProducer;
+    public LogKafkaProducerAspect(KafkaProducer KafkaProducer) {
+        this.KafkaProducer = KafkaProducer;
     }
 
     @Around("execution(* com.cs301.crm.controllers..*(..))")
@@ -73,7 +73,7 @@ public class LogKafkaProducerAspect {
                     .build();
 
             logger.info("Pushing log to Kafka");
-            logKafkaProducer.produceMessage(logMessage);
+            KafkaProducer.produceMessage(logMessage);
             return result;
     }
 

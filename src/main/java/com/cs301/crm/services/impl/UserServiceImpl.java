@@ -7,20 +7,25 @@ import com.cs301.crm.exceptions.InvalidUserCredentials;
 import com.cs301.crm.mappers.UserEntityMapper;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.models.UserRole;
+import com.cs301.crm.producers.KafkaProducer;
+import com.cs301.crm.protobuf.Notification;
+import com.cs301.crm.protobuf.Otp;
 import com.cs301.crm.repositories.UserRepository;
 import com.cs301.crm.services.UserService;
+import com.cs301.crm.utils.PasswordUtil;
 import com.google.common.cache.LoadingCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
+import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Random;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -30,32 +35,62 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final LoadingCache<String, Integer> oneTimePasswordCache;
+    private final KafkaProducer kafkaProducer;
 
     @Autowired
     public UserServiceImpl(UserRepository userRepository,
                            PasswordEncoder passwordEncoder,
-                           LoadingCache<String, Integer> oneTimePasswordCache) {
+                           LoadingCache<String, Integer> oneTimePasswordCache,
+                           KafkaProducer kafkaProducer) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.oneTimePasswordCache = oneTimePasswordCache;
+        this.kafkaProducer = kafkaProducer;
     }
 
     @Override
     @Transactional
     public GenericResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) {
-        String username = createUserRequestDTO.username();
+        // Create the new user
+        String tempPassword = PasswordUtil.generatePassword();
         UserEntity userEntity = UserEntityMapper.INSTANCE.createUserRequestDTOtoUserEntity(createUserRequestDTO);
-        userEntity.setEnabled(false);
-        userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
+        userEntity.setEnabled(true);
+        userEntity.setPassword(passwordEncoder.encode(tempPassword));
         userRepository.save(userEntity);
-        logger.info("Saved {} into the database", userEntity);
+        logger.info("Saved {} into the database with generated password {}", userEntity, tempPassword);
 
-        oneTimePasswordCache.invalidate(username);
-        final int otp = new SecureRandom().nextInt(900000) + 100000;
-        oneTimePasswordCache.put(username, otp);
-        logger.info("Generated {}", otp);
+        // Generate otp for current user
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String actorUsername = jwt.getClaimAsString("sub");
 
-        logger.info("Sent email generation message to Kafka");
+        oneTimePasswordCache.invalidate(actorUsername);
+        final int otp = PasswordUtil.generateOtp();
+        oneTimePasswordCache.put(actorUsername, otp);
+        logger.info("Generated {} for {}", otp, actorUsername);
+
+        // Send otp message to kafka
+        UserEntity actor = userRepository.findByUsername(actorUsername)
+                .orElseThrow(() -> new UsernameNotFoundException(actorUsername));
+
+        Otp otpMessage = Otp.newBuilder()
+                .setEmail(actor.getEmail())
+                .setOtp(otp)
+                .setTimestamp(Instant.now().toString())
+                .build();
+
+        kafkaProducer.produceMessage(otpMessage);
+        logger.info("Sent otp message to Kafka");
+
+        // Send notification of account creation to new user
+        Notification notificationMessage = Notification.newBuilder()
+                .setEmail(userEntity.getEmail())
+                .setUsername(userEntity.getUsername())
+                .setTempPassword(tempPassword)
+                .setRole(userEntity.getUserRole().toString())
+                .build();
+
+        kafkaProducer.produceMessage(notificationMessage);
+        logger.info("Sent notification message to Kafka");
         return new GenericResponseDTO(
                 true, "User saved successfully, please verify account creation with OTP sent to the email", ZonedDateTime.now()
         );
