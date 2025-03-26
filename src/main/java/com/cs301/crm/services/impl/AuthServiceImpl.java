@@ -29,11 +29,11 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public GenericResponseDTO login(LoginRequestDTO loginRequestDTO) {
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequestDTO.username(), loginRequestDTO.password())
+                new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password())
         );
 
         if (!(authentication.getPrincipal() instanceof UserDetails userDetails)) {
-            throw new InvalidUserCredentials("Username or password is incorrect");
+            throw new InvalidUserCredentials("Email or password is incorrect");
         }
 
         return new GenericResponseDTO(

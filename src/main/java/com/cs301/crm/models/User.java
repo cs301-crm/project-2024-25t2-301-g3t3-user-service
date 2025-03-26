@@ -26,6 +26,8 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userEntity.getUsername();
+        return userEntity.getId().toString();
     }
+
+    public String getEmail() { return userEntity.getEmail(); }
 }

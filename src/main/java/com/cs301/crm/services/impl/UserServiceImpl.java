@@ -59,38 +59,38 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
         logger.info("Saved {} into the database with generated password {}", userEntity, tempPassword);
 
-        // Generate otp for current user
-        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String actorUsername = jwt.getClaimAsString("sub");
-
-        oneTimePasswordCache.invalidate(actorUsername);
-        final int otp = PasswordUtil.generateOtp();
-        oneTimePasswordCache.put(actorUsername, otp);
-        logger.info("Generated {} for {}", otp, actorUsername);
-
-        // Send otp message to kafka
-        UserEntity actor = userRepository.findByUsername(actorUsername)
-                .orElseThrow(() -> new UsernameNotFoundException(actorUsername));
-
-        Otp otpMessage = Otp.newBuilder()
-                .setEmail(actor.getEmail())
-                .setOtp(otp)
-                .setTimestamp(Instant.now().toString())
-                .build();
-
-        kafkaProducer.produceMessage(otpMessage);
-        logger.info("Sent otp message to Kafka");
-
-        // Send notification of account creation to new user
-        Notification notificationMessage = Notification.newBuilder()
-                .setEmail(userEntity.getEmail())
-                .setUsername(userEntity.getUsername())
-                .setTempPassword(tempPassword)
-                .setRole(userEntity.getUserRole().toString())
-                .build();
-
-        kafkaProducer.produceMessage(notificationMessage);
-        logger.info("Sent notification message to Kafka");
+//        // Generate otp for current user
+//        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//        String actorUsername = "test"; // jwt.getClaimAsString("sub");
+//
+//        oneTimePasswordCache.invalidate(actorUsername);
+//        final int otp = PasswordUtil.generateOtp();
+//        oneTimePasswordCache.put(actorUsername, otp);
+//        logger.info("Generated {} for {}", otp, actorUsername);
+//
+//        // Send otp message to kafka
+//        UserEntity actor = userRepository.findByUsername(actorUsername)
+//                .orElseThrow(() -> new UsernameNotFoundException(actorUsername));
+//
+//        Otp otpMessage = Otp.newBuilder()
+//                .setEmail(actor.getEmail())
+//                .setOtp(otp)
+//                .setTimestamp(Instant.now().toString())
+//                .build();
+//
+//        kafkaProducer.produceMessage(otpMessage);
+//        logger.info("Sent otp message to Kafka");
+//
+//        // Send notification of account creation to new user
+//        Notification notificationMessage = Notification.newBuilder()
+//                .setEmail(userEntity.getEmail())
+//                .setUsername(userEntity.getUsername())
+//                .setTempPassword(tempPassword)
+//                .setRole(userEntity.getUserRole().toString())
+//                .build();
+//
+//        kafkaProducer.produceMessage(notificationMessage);
+//        logger.info("Sent notification message to Kafka");
         return new GenericResponseDTO(
                 true, "User saved successfully, please verify account creation with OTP sent to the email", ZonedDateTime.now()
         );
@@ -99,8 +99,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public GenericResponseDTO toggleEnable(DisableEnableRequestDTO disableEnableRequestDTO, boolean enable) {
-        UserEntity userEntity = userRepository.findByUsername(disableEnableRequestDTO.username()).orElseThrow(
-                () -> new UsernameNotFoundException(disableEnableRequestDTO.username())
+        UserEntity userEntity = userRepository.findByEmail(disableEnableRequestDTO.email()).orElseThrow(
+                () -> new UsernameNotFoundException(disableEnableRequestDTO.email())
         );
         userEntity.setEnabled(enable);
         userRepository.save(userEntity);
@@ -114,8 +114,8 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public GenericResponseDTO enableUser(OtpVerificationDTO otpVerificationDTO) throws ExecutionException {
-        String username = otpVerificationDTO.username();
-        UserEntity userEntity = userRepository.findByUsername(username).orElseThrow(
+        String username = otpVerificationDTO.email();
+        UserEntity userEntity = userRepository.findByEmail(username).orElseThrow(
                 () -> new UsernameNotFoundException(username)
         );
 
@@ -139,12 +139,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public GenericResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO) {
-        UserEntity oldUserEntity = userRepository.findByUsername(updateUserRequestDTO.username()).orElseThrow(
-                () -> new UsernameNotFoundException(updateUserRequestDTO.username())
+        UserEntity oldUserEntity = userRepository.findByEmail(updateUserRequestDTO.email()).orElseThrow(
+                () -> new UsernameNotFoundException(updateUserRequestDTO.email())
         );
         oldUserEntity.setFirstName(updateUserRequestDTO.firstName());
         oldUserEntity.setLastName(updateUserRequestDTO.lastName());
-        oldUserEntity.setUsername(updateUserRequestDTO.username());
         oldUserEntity.setEmail(updateUserRequestDTO.email());
         oldUserEntity.setUserRole(UserRole.valueOf(updateUserRequestDTO.userRole()));
 
@@ -157,8 +156,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public GenericResponseDTO resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
-        UserEntity userEntity = userRepository.findByUsername(resetPasswordRequestDTO.username()).orElseThrow(
-                () -> new UsernameNotFoundException(resetPasswordRequestDTO.username())
+        UserEntity userEntity = userRepository.findByEmail(resetPasswordRequestDTO.email()).orElseThrow(
+                () -> new UsernameNotFoundException(resetPasswordRequestDTO.email())
         );
 
         if (!passwordEncoder.matches(

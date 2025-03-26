@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 public record LoginRequestDTO(
         @NotNull(message = "Username cannot be null")
         @NotEmpty(message = "Username cannot be empty")
-        String username,
+        String email,
 
         @NotNull(message = "Password cannot be null")
         @NotEmpty(message = "Password cannot be empty")

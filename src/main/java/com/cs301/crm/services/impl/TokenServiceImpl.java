@@ -1,6 +1,7 @@
 package com.cs301.crm.services.impl;
 
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.exceptions.EmailNotFoundException;
 import com.cs301.crm.models.RefreshToken;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.repositories.TokenRepository;
@@ -34,9 +35,9 @@ public class TokenServiceImpl implements TokenService {
 
     @Override
     @Transactional
-    public String createRefreshToken(String username) {
-        UserEntity user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
+    public String createRefreshToken(String email) {
+        UserEntity user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EmailNotFoundException(email));
 
         final UUID tokenId = UUID.randomUUID();
         final RefreshToken refreshToken = new RefreshToken();

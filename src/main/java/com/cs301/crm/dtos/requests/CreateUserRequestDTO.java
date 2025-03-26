@@ -11,10 +11,6 @@ public record CreateUserRequestDTO(
         @NotEmpty(message = "Last name cannot be empty")
         String lastName,
 
-        @NotNull(message = "Username cannot be null")
-        @NotEmpty(message = "Username cannot be empty")
-        String username,
-
         @NotNull(message = "Email cannot be null")
         @NotEmpty(message = "Email cannot be empty")
         @Email(message = "Invalid email format")

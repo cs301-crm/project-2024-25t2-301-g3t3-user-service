@@ -3,9 +3,10 @@ package com.cs301.crm.dtos.requests;
 import jakarta.validation.constraints.*;
 
 public record ResetPasswordRequestDTO(
-        @NotNull(message = "Username cannot be null")
-        @NotEmpty(message = "Username cannot be empty")
-        String username,
+        @NotNull(message = "Email cannot be null")
+        @NotEmpty(message = "Email cannot be empty")
+        @Email(message = "Invalid email format")
+        String email,
 
         @NotNull(message = "Password cannot be null")
         @NotEmpty(message = "Password cannot be empty")

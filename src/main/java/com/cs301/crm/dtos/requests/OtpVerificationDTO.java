@@ -7,7 +7,7 @@ public record OtpVerificationDTO(
 
         @NotNull(message = "Username cannot be null")
         @NotEmpty(message = "Username cannot be empty")
-        String username,
+        String email,
 
         @NotNull(message = "OTP cannot be null")
         Integer oneTimePassword

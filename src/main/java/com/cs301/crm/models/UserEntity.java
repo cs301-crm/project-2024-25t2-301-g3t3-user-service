@@ -32,9 +32,6 @@ public class UserEntity {
     private String lastName;
 
     @Column(unique = true, nullable = false)
-    private String username;
-
-    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(nullable = false)
@@ -58,5 +55,6 @@ public class UserEntity {
     @PrePersist
     void setUp() {
         this.createdAt = Instant.now();
+        this.enabled = false;
     }
 }

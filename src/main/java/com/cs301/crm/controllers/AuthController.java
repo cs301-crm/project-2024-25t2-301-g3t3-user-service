@@ -31,7 +31,8 @@ public class AuthController {
     @Autowired
     public AuthController(AuthService authService,
                           CookieUtil cookieUtil,
-                          TokenService tokenService, UserDetailsService userDetailsService) {
+                          TokenService tokenService,
+                          UserDetailsService userDetailsService) {
         this.authService = authService;
         this.cookieUtil = cookieUtil;
         this.tokenService = tokenService;
@@ -43,7 +44,7 @@ public class AuthController {
             @RequestBody @Valid LoginRequestDTO loginRequestDTO
     ) {
         GenericResponseDTO response = authService.login(loginRequestDTO);
-        String refreshToken = tokenService.createRefreshToken(loginRequestDTO.username());
+        String refreshToken = tokenService.createRefreshToken(loginRequestDTO.email());
 
         List<ResponseCookie> refreshTokenCookies = cookieUtil.buildRefreshToken(refreshToken);
         ResponseCookie accessCookie = cookieUtil.buildAccessToken(response.message());
@@ -90,7 +91,7 @@ public class AuthController {
         UserEntity user = refreshToken.getUser();
 
         String accessToken = authService.generateAccessToken(
-                userDetailsService.loadUserByUsername(user.getUsername())
+                userDetailsService.loadUserByUsername(user.getEmail())
         );
 
         ResponseCookie accessCookie = cookieUtil.buildAccessToken(accessToken);
