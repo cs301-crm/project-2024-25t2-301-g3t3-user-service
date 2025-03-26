@@ -48,8 +48,8 @@ public class SecurityConfig {
                 auth
                         .requestMatchers(
                             "/api/users/enable",
-                            "/api/users/disable"
-//                            "/api/users"
+                            "/api/users/disable",
+                            "/api/users"
                         )
                         .hasAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(

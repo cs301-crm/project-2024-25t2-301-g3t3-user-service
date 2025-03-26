@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 @Service
@@ -59,38 +60,38 @@ public class UserServiceImpl implements UserService {
         userRepository.save(userEntity);
         logger.info("Saved {} into the database with generated password {}", userEntity, tempPassword);
 
-//        // Generate otp for current user
-//        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//        String actorUsername = "test"; // jwt.getClaimAsString("sub");
-//
-//        oneTimePasswordCache.invalidate(actorUsername);
-//        final int otp = PasswordUtil.generateOtp();
-//        oneTimePasswordCache.put(actorUsername, otp);
-//        logger.info("Generated {} for {}", otp, actorUsername);
-//
-//        // Send otp message to kafka
-//        UserEntity actor = userRepository.findByUsername(actorUsername)
-//                .orElseThrow(() -> new UsernameNotFoundException(actorUsername));
-//
-//        Otp otpMessage = Otp.newBuilder()
-//                .setEmail(actor.getEmail())
-//                .setOtp(otp)
-//                .setTimestamp(Instant.now().toString())
-//                .build();
-//
-//        kafkaProducer.produceMessage(otpMessage);
-//        logger.info("Sent otp message to Kafka");
-//
-//        // Send notification of account creation to new user
-//        Notification notificationMessage = Notification.newBuilder()
-//                .setEmail(userEntity.getEmail())
-//                .setUsername(userEntity.getUsername())
-//                .setTempPassword(tempPassword)
-//                .setRole(userEntity.getUserRole().toString())
-//                .build();
-//
-//        kafkaProducer.produceMessage(notificationMessage);
-//        logger.info("Sent notification message to Kafka");
+        // Generate otp for current user
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String actorId = jwt.getClaimAsString("sub");
+
+        oneTimePasswordCache.invalidate(actorId);
+        final int otp = PasswordUtil.generateOtp();
+        oneTimePasswordCache.put(actorId, otp);
+        logger.info("Generated {} for {}", otp, actorId);
+
+        // Send otp message to kafka
+        UserEntity actor = userRepository.findById(UUID.fromString(actorId))
+                .orElseThrow(() -> new UsernameNotFoundException(actorId));
+
+        Otp otpMessage = Otp.newBuilder()
+                .setEmail(actor.getEmail())
+                .setOtp(otp)
+                .setTimestamp(Instant.now().toString())
+                .build();
+
+        kafkaProducer.produceMessage(otpMessage);
+        logger.info("Sent otp message to Kafka");
+
+        // Send notification of account creation to new user
+        Notification notificationMessage = Notification.newBuilder()
+                .setEmail(userEntity.getEmail())
+                .setUsername(userEntity.getFirstName())
+                .setTempPassword(tempPassword)
+                .setRole(userEntity.getUserRole().toString())
+                .build();
+
+        kafkaProducer.produceMessage(notificationMessage);
+        logger.info("Sent notification message to Kafka");
         return new GenericResponseDTO(
                 true, "User saved successfully, please verify account creation with OTP sent to the email", ZonedDateTime.now()
         );
