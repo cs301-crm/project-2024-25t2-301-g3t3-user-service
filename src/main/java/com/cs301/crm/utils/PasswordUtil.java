@@ -9,8 +9,12 @@ public class PasswordUtil {
     private static final String DIGITS = "0123456789";
     private static final String SPECIAL_CHARS = "!@#$%^&*()-_=+[]{}|;:,.<>?";
     private static final String ALL_CHARS = UPPERCASE + LOWERCASE + DIGITS + SPECIAL_CHARS;
-    private static final int length = 9;
+    private static final int LENGTH = 9;
     private static final SecureRandom secureRandom = new SecureRandom();
+
+    private PasswordUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static String generatePassword() {
 

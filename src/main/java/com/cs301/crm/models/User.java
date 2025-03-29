@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public class User implements UserDetails {
 
-    private final UserEntity userEntity;
+    private transient UserEntity userEntity;
 
     public User(UserEntity userEntity) {
         this.userEntity = userEntity;

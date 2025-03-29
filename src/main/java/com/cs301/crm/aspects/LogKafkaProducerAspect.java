@@ -27,11 +27,11 @@ public class LogKafkaProducerAspect {
 
     private static final Logger logger = LoggerFactory.getLogger(LogKafkaProducerAspect.class);
 
-    private final KafkaProducer KafkaProducer;
+    private final KafkaProducer kafkaProducer;
 
     @Autowired
-    public LogKafkaProducerAspect(KafkaProducer KafkaProducer) {
-        this.KafkaProducer = KafkaProducer;
+    public LogKafkaProducerAspect(KafkaProducer kafkaProducer) {
+        this.kafkaProducer = kafkaProducer;
     }
 
     @Around("execution(* com.cs301.crm.controllers..*(..))")
@@ -73,7 +73,7 @@ public class LogKafkaProducerAspect {
                     .build();
 
             logger.info("Pushing log to Kafka");
-            KafkaProducer.produceMessage(logMessage);
+            kafkaProducer.produceMessage(logMessage);
             return result;
     }
 
