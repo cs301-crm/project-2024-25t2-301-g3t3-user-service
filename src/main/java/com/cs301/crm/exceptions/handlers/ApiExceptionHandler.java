@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -40,10 +41,19 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(value = {InternalAuthenticationServiceException.class})
+    public ResponseEntity<ErrorResponse> handleEmailNotFound() {
+        return new ResponseEntity<>(
+                new ErrorResponse(false, "You do not have an account, contact a root user or admin to get an account",
+                        HttpStatus.BAD_REQUEST,
+                        ZonedDateTime.now()
+                ), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = {InvalidUserCredentials.class, BadCredentialsException.class})
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(Exception e) {
         return new ResponseEntity<>(
-                new ErrorResponse(false,e.getMessage(),
+                new ErrorResponse(false, "Ensure you have typed your email/password correctly",
                         HttpStatus.UNAUTHORIZED,
                         ZonedDateTime.now()
                 ), HttpStatus.UNAUTHORIZED);
