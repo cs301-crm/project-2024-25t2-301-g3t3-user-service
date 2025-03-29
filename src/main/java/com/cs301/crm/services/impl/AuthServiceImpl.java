@@ -9,7 +9,7 @@ import com.cs301.crm.producers.KafkaProducer;
 import com.cs301.crm.protobuf.Otp;
 import com.cs301.crm.services.AuthService;
 import com.cs301.crm.utils.JwtUtil;
-import com.cs301.crm.utils.OtpUtil;
+import com.cs301.crm.utils.RedisUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,20 +31,17 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
-    private final OtpUtil otpUtil;
-    private final KafkaProducer kafkaProducer;
+    private final RedisUtil redisUtil;
 
     @Autowired
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            JwtUtil jwtUtil,
                            UserDetailsService userDetailsService,
-                           OtpUtil otpUtil,
-                           KafkaProducer kafkaProducer) {
+                           RedisUtil redisUtil) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.userDetailsService = userDetailsService;
-        this.otpUtil = otpUtil;
-        this.kafkaProducer = kafkaProducer;
+        this.redisUtil = redisUtil;
     }
 
     @Override
@@ -57,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
             throw new InvalidUserCredentials("Email or password is incorrect");
         }
 
-        sendOtp(loginRequestDTO.email());
+        redisUtil.generateOtp(loginRequestDTO.email());
 
         return new GenericResponseDTO(
                 true, "Please verify using the OTP sent to your email address", ZonedDateTime.now()
@@ -65,12 +62,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public GenericResponseDTO verifyOtp(LoginOtpVerificationDTO otpVerificationDTO) throws ExecutionException {
-        if (otpUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
+    public GenericResponseDTO verifyOtp(LoginOtpVerificationDTO otpVerificationDTO) {
+        if (redisUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
             throw new InvalidUserCredentials("Wrong OTP, please try again");
         }
 
-        otpUtil.invalidateOtp(otpVerificationDTO.email());
+        redisUtil.cleanupAfterSuccessfulVerification(otpVerificationDTO.email());
 
         logger.info("{} login successful", otpVerificationDTO.email());
 
@@ -81,8 +78,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public GenericResponseDTO resendOtp(ResendOtpRequestDTO otpRequestDTO) {
-        otpUtil.invalidateOtp(otpRequestDTO.email());
-        sendOtp(otpRequestDTO.email());
+        redisUtil.invalidateExistingOtps(otpRequestDTO.email());
+        redisUtil.generateOtp(otpRequestDTO.email());
 
         return new GenericResponseDTO(
                 true, "A new OTP has been sent to your email address.", ZonedDateTime.now()
@@ -92,18 +89,5 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String generateAccessToken(String email) {
         return jwtUtil.generateToken(userDetailsService.loadUserByUsername(email));
-    }
-
-    private void sendOtp(String email) {
-        final int otp = otpUtil.generateOtp(email);
-
-        Otp otpMessage = Otp.newBuilder()
-                .setEmail(email)
-                .setOtp(otp)
-                .setTimestamp(Instant.now().toString())
-                .build();
-
-        kafkaProducer.produceMessage(otpMessage);
-        logger.info("Otp message sent to Kafka from auth service");
     }
 }

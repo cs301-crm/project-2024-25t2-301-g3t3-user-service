@@ -9,7 +9,7 @@ import java.util.concurrent.ExecutionException;
 
 public interface AuthService {
     GenericResponseDTO login(LoginRequestDTO loginRequestDTO);
-    GenericResponseDTO verifyOtp(LoginOtpVerificationDTO otpVerificationDTO) throws ExecutionException;
-    GenericResponseDTO resendOtp(ResendOtpRequestDTO otpRequestDTO) throws ExecutionException;
+    GenericResponseDTO verifyOtp(LoginOtpVerificationDTO otpVerificationDTO);
+    GenericResponseDTO resendOtp(ResendOtpRequestDTO otpRequestDTO);
     String generateAccessToken(String email);
 }
