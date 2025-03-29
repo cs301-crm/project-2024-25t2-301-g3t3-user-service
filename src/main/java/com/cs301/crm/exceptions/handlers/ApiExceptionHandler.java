@@ -24,7 +24,8 @@ public class ApiExceptionHandler {
             sb.append(errorMessage).append(", ");
         });
         return new ResponseEntity<>(
-                new ErrorResponse(sb.substring(0, sb.length() - 2),
+                new ErrorResponse(false,
+                        sb.substring(0, sb.length() - 2),
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
@@ -33,7 +34,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {UsernameNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleUsernameDoesNotExist(UsernameNotFoundException e) {
         return new ResponseEntity<>(
-                new ErrorResponse("Username " + e.getMessage() + " not found",
+                new ErrorResponse(false,"Username " + e.getMessage() + " not found",
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
@@ -42,7 +43,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {InvalidUserCredentials.class, BadCredentialsException.class})
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(Exception e) {
         return new ResponseEntity<>(
-                new ErrorResponse(e.getMessage(),
+                new ErrorResponse(false,e.getMessage(),
                         HttpStatus.UNAUTHORIZED,
                         ZonedDateTime.now()
                 ), HttpStatus.UNAUTHORIZED);
@@ -52,7 +53,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {ExecutionException.class})
     public ResponseEntity<ErrorResponse> handleInvalidOtpRequest(Exception e) {
         return new ResponseEntity<>(
-                new ErrorResponse("Invalid OTP request",
+                new ErrorResponse(false,"Invalid OTP request",
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
@@ -62,7 +63,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {InvalidOtpException.class})
     public ResponseEntity<ErrorResponse> handleInvalidOtpSubmission(Exception e) {
         return new ResponseEntity<>(
-                new ErrorResponse(e.getMessage(),
+                new ErrorResponse(false,e.getMessage(),
                         HttpStatus.UNAUTHORIZED,
                         ZonedDateTime.now()
                 ), HttpStatus.UNAUTHORIZED);
@@ -73,7 +74,7 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handleBlankRequests() {
 
         return new ResponseEntity<>(
-                new ErrorResponse("You are missing inputs in your request, please follow our API documentation",
+                new ErrorResponse(false,"You are missing inputs in your request, please follow our API documentation",
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
@@ -82,7 +83,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {Exception.class, AwsException.class, JwtCreationException.class})
     public ResponseEntity<ErrorResponse> handleException() {
         return new ResponseEntity<>(
-                new ErrorResponse("Something went wrong on our end.",
+                new ErrorResponse(false,"Something went wrong on our end.",
                         HttpStatus.SERVICE_UNAVAILABLE,
                         ZonedDateTime.now()
                 ), HttpStatus.SERVICE_UNAVAILABLE);
@@ -91,7 +92,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {InvalidTokenException.class})
     public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidTokenException e) {
         return new ResponseEntity<>(
-                new ErrorResponse(e.getMessage(),
+                new ErrorResponse(false, e.getMessage(),
                         HttpStatus.UNAUTHORIZED,
                         ZonedDateTime.now()
                 ), HttpStatus.UNAUTHORIZED);
