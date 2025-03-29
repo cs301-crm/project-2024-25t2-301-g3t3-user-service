@@ -31,10 +31,6 @@ public class PasswordUtil {
         return shuffleString(password.toString());
     }
 
-    public static int generateOtp() {
-        return secureRandom.nextInt(900000) + 100000;
-    }
-
     private static char getRandomChar(String characters) {
         return characters.charAt(secureRandom.nextInt(characters.length()));
     }
