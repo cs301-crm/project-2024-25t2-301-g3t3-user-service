@@ -1,10 +1,11 @@
-package com.cs301.crm.dtos.requests;
+package com.cs301.crm.dtos.requests.auth;
 
 import jakarta.validation.constraints.*;
 
 public record LoginRequestDTO(
-        @NotNull(message = "Username cannot be null")
-        @NotEmpty(message = "Username cannot be empty")
+        @NotNull(message = "Email cannot be null")
+        @NotEmpty(message = "Email cannot be empty")
+        @Email(message = "Invalid email format")
         String email,
 
         @NotNull(message = "Password cannot be null")

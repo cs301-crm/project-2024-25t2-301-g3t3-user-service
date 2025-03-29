@@ -1,10 +1,15 @@
 package com.cs301.crm.services;
 
-import com.cs301.crm.dtos.requests.LoginRequestDTO;
+import com.cs301.crm.dtos.requests.auth.LoginOtpVerificationDTO;
+import com.cs301.crm.dtos.requests.auth.LoginRequestDTO;
+import com.cs301.crm.dtos.requests.auth.ResendOtpRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
-import org.springframework.security.core.userdetails.UserDetails;
+
+import java.util.concurrent.ExecutionException;
 
 public interface AuthService {
     GenericResponseDTO login(LoginRequestDTO loginRequestDTO);
-    String generateAccessToken(UserDetails userDetails);
+    GenericResponseDTO verifyOtp(LoginOtpVerificationDTO otpVerificationDTO) throws ExecutionException;
+    GenericResponseDTO resendOtp(ResendOtpRequestDTO otpRequestDTO) throws ExecutionException;
+    String generateAccessToken(String email);
 }

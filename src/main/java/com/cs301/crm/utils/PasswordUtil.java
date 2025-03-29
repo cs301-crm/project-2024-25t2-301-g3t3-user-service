@@ -9,12 +9,16 @@ public class PasswordUtil {
     private static final String DIGITS = "0123456789";
     private static final String SPECIAL_CHARS = "!@#$%^&*()-_=+[]{}|;:,.<>?";
     private static final String ALL_CHARS = UPPERCASE + LOWERCASE + DIGITS + SPECIAL_CHARS;
-    private static final int length = 9;
+    private static final int LENGTH = 9;
     private static final SecureRandom secureRandom = new SecureRandom();
+
+    private PasswordUtil() {
+        throw new IllegalStateException("Utility class");
+    }
 
     public static String generatePassword() {
 
-        StringBuilder password = new StringBuilder(length);
+        StringBuilder password = new StringBuilder(LENGTH);
 
         // Ensure at least one character from each category
         password.append(getRandomChar(UPPERCASE));
@@ -23,16 +27,12 @@ public class PasswordUtil {
         password.append(getRandomChar(SPECIAL_CHARS));
 
         // Fill the rest of the password with random characters
-        for (int i = 4; i < length; i++) {
+        for (int i = 4; i < LENGTH; i++) {
             password.append(getRandomChar(ALL_CHARS));
         }
 
         // Shuffle the password to avoid predictable order
         return shuffleString(password.toString());
-    }
-
-    public static int generateOtp() {
-        return secureRandom.nextInt(900000) + 100000;
     }
 
     private static char getRandomChar(String characters) {
