@@ -1,6 +1,8 @@
 package com.cs301.crm.controllers;
 
-import com.cs301.crm.dtos.requests.LoginRequestDTO;
+import com.cs301.crm.dtos.requests.auth.LoginOtpVerificationDTO;
+import com.cs301.crm.dtos.requests.auth.LoginRequestDTO;
+import com.cs301.crm.dtos.requests.auth.ResendOtpRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
 import com.cs301.crm.exceptions.InvalidTokenException;
 import com.cs301.crm.models.RefreshToken;
@@ -13,38 +15,42 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 public class AuthController {
     private final AuthService authService;
     private final CookieUtil cookieUtil;
     private final TokenService tokenService;
-    private final UserDetailsService userDetailsService;
 
     @Autowired
     public AuthController(AuthService authService,
                           CookieUtil cookieUtil,
-                          TokenService tokenService,
-                          UserDetailsService userDetailsService) {
+                          TokenService tokenService) {
         this.authService = authService;
         this.cookieUtil = cookieUtil;
         this.tokenService = tokenService;
-        this.userDetailsService = userDetailsService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<GenericResponseDTO> login(
             @RequestBody @Valid LoginRequestDTO loginRequestDTO
     ) {
-        GenericResponseDTO response = authService.login(loginRequestDTO);
-        String refreshToken = tokenService.createRefreshToken(loginRequestDTO.email());
+        return ResponseEntity.ok(authService.login(loginRequestDTO));
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<GenericResponseDTO> verifyOtp(
+            @RequestBody @Valid LoginOtpVerificationDTO loginOtpVerificationDTO
+    ) throws ExecutionException {
+        GenericResponseDTO response = authService.verifyOtp(loginOtpVerificationDTO);
+        String refreshToken = tokenService.createRefreshToken(loginOtpVerificationDTO.email());
 
         List<ResponseCookie> refreshTokenCookies = cookieUtil.buildRefreshToken(refreshToken);
         ResponseCookie accessCookie = cookieUtil.buildAccessToken(response.message());
@@ -57,6 +63,13 @@ public class AuthController {
                     headers.add(HttpHeaders.SET_COOKIE, accessCookie.toString());
                 })
                 .body(response);
+    }
+
+    @PostMapping("/resend-otp")
+    public ResponseEntity<GenericResponseDTO> resendOtp(
+            @Valid @RequestBody ResendOtpRequestDTO otpRequestDTO
+    ) throws ExecutionException {
+        return ResponseEntity.ok(authService.resendOtp(otpRequestDTO));
     }
 
     @PostMapping("/logout")
@@ -90,9 +103,7 @@ public class AuthController {
 
         UserEntity user = refreshToken.getUser();
 
-        String accessToken = authService.generateAccessToken(
-                userDetailsService.loadUserByUsername(user.getEmail())
-        );
+        String accessToken = authService.generateAccessToken(user.getEmail());
 
         ResponseCookie accessCookie = cookieUtil.buildAccessToken(accessToken);
 
