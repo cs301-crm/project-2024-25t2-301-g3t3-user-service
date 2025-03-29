@@ -15,6 +15,11 @@ spring:
       ddl-auto: ${SPRING_JPA_DDL:create-drop}
   kafka:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      client-name: user-service
+      port: ${SPRING_REDIS_PORT:6379}
 
 kafka:
   topic:
