@@ -1,4 +1,4 @@
-package com.cs301.crm.dtos.requests;
+package com.cs301.crm.dtos.requests.users;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

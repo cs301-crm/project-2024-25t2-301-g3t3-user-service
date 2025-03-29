@@ -1,9 +1,8 @@
-package com.cs301.crm.dtos.requests;
+package com.cs301.crm.dtos.requests.users;
 
 import jakarta.validation.constraints.*;
 
-public record UpdateUserRequestDTO(
-
+public record CreateUserRequestDTO(
         @NotNull(message = "First name cannot be null")
         @NotEmpty(message = "First name cannot be empty")
         String firstName,
@@ -20,5 +19,4 @@ public record UpdateUserRequestDTO(
         @NotNull(message = "Role cannot be null")
         @NotEmpty(message = "Role cannot be empty")
         String userRole
-)
-{}
+) {}
