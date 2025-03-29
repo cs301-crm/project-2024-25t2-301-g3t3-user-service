@@ -1,6 +1,7 @@
 package com.cs301.crm.exceptions.handlers;
 
 import com.cs301.crm.exceptions.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -90,7 +91,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {Exception.class, AwsException.class, JwtCreationException.class})
+    @ExceptionHandler(value = {Exception.class, AwsException.class, JwtCreationException.class, JsonProcessingException.class})
     public ResponseEntity<ErrorResponse> handleException() {
         return new ResponseEntity<>(
                 new ErrorResponse(false,"Something went wrong on our end.",
