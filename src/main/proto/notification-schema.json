@@ -1,4 +1,0 @@
-{
-  "schemaType": "PROTOBUF",
-  "schema": "syntax = \"proto3\";\n\npackage com.cs301.crm;\n\noption java_multiple_files = true;\noption java_package = \"com.cs301.crm.protobuf\";\n\nmessage Notification {\n  string email = 1;\n  string username = 2;\n  string tempPassword = 3;\n  string role = 4;\n}"
-}
