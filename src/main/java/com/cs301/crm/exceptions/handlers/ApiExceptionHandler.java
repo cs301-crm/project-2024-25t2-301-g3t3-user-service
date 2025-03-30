@@ -1,10 +1,12 @@
 package com.cs301.crm.exceptions.handlers;
 
 import com.cs301.crm.exceptions.*;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.ZonedDateTime;
-import java.util.concurrent.ExecutionException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
@@ -45,13 +46,13 @@ public class ApiExceptionHandler {
     public ResponseEntity<ErrorResponse> handleEmailNotFound() {
         return new ResponseEntity<>(
                 new ErrorResponse(false, "You do not have an account, contact a root user or admin to get an account",
-                        HttpStatus.BAD_REQUEST,
+                        HttpStatus.UNAUTHORIZED,
                         ZonedDateTime.now()
-                ), HttpStatus.BAD_REQUEST);
+                ), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(value = {InvalidUserCredentials.class, BadCredentialsException.class})
-    public ResponseEntity<ErrorResponse> handleInvalidCredentials(Exception e) {
+    @ExceptionHandler(value = {BadCredentialsException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials() {
         return new ResponseEntity<>(
                 new ErrorResponse(false, "Ensure you have typed your email/password correctly",
                         HttpStatus.UNAUTHORIZED,
@@ -59,14 +60,13 @@ public class ApiExceptionHandler {
                 ), HttpStatus.UNAUTHORIZED);
     }
 
-    // This is for if the OTP does not exist in the cache (means stale, or something went wrong)
-    @ExceptionHandler(value = {ExecutionException.class})
-    public ResponseEntity<ErrorResponse> handleInvalidOtpRequest(Exception e) {
+    @ExceptionHandler(value = {InvalidUserCredentials.class})
+    public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidUserCredentials e) {
         return new ResponseEntity<>(
-                new ErrorResponse(false,"Invalid OTP request",
-                        HttpStatus.BAD_REQUEST,
+                new ErrorResponse(false, e.getMessage(),
+                        HttpStatus.UNAUTHORIZED,
                         ZonedDateTime.now()
-                ), HttpStatus.BAD_REQUEST);
+                ), HttpStatus.UNAUTHORIZED);
     }
 
     // This is for if the OTP value is wrong, but OTP correct number does exist in the cache
@@ -90,7 +90,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {Exception.class, AwsException.class, JwtCreationException.class})
+    @ExceptionHandler(value = {Exception.class, AwsException.class, JwtCreationException.class, JsonProcessingException.class})
     public ResponseEntity<ErrorResponse> handleException() {
         return new ResponseEntity<>(
                 new ErrorResponse(false,"Something went wrong on our end.",
@@ -108,5 +108,13 @@ public class ApiExceptionHandler {
                 ), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(value = {DisabledException.class})
+    public ResponseEntity<ErrorResponse> handleAccountDisabled(Exception e) {
+        return new ResponseEntity<>(
+                new ErrorResponse(false, e.getMessage(),
+                        HttpStatus.UNAUTHORIZED,
+                        ZonedDateTime.now()
+                ), HttpStatus.UNAUTHORIZED);
+    }
 
 }

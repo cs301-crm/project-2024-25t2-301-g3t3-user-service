@@ -46,15 +46,12 @@ public class UserEntity {
     @Column(nullable = false)
     private boolean enabled;
 
-    @Column(name = "email_verified", nullable = false)
-    private boolean isEmailVerified;
-
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
     @PrePersist
     void setUp() {
         this.createdAt = Instant.now();
-        this.enabled = false;
+        this.enabled = true;
     }
 }

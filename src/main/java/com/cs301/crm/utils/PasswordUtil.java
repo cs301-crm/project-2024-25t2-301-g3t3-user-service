@@ -39,6 +39,10 @@ public class PasswordUtil {
         return characters.charAt(secureRandom.nextInt(characters.length()));
     }
 
+    public static int generateOtpValue() {
+        return secureRandom.nextInt(900000) + 100000;
+    }
+
     private static String shuffleString(String input) {
         char[] array = input.toCharArray();
         for (int i = array.length - 1; i > 0; i--) {

@@ -1,4 +1,4 @@
-package com.cs301.crm.dtos.requests.auth;
+package com.cs301.crm.dtos.requests;
 
 import jakarta.validation.constraints.*;
 

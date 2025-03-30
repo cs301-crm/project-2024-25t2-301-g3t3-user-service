@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class CookieUtil {
 
-    private final List<String> cookiePaths = List.of("/api/auth/refresh", "/api/auth/logout");
+    private final List<String> cookiePaths = List.of("/api/v1/auth/refresh", "/api/v1/auth/logout");
 
     @Value("${cookie.httpsEnabled}")
     private boolean httpsEnabled;
