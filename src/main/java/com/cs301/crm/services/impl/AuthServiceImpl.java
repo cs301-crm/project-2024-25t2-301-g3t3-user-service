@@ -66,7 +66,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public GenericResponseDTO verifyOtp(OtpVerificationDTO otpVerificationDTO) {
-        if (!redisUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
+        if (redisUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
             throw new InvalidUserCredentials("Wrong OTP, please try again");
         }
 
