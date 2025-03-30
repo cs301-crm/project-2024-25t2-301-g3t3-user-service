@@ -37,8 +37,8 @@ public class RedisUtil {
         final int otp = PasswordUtil.generateOtpValue();
 
         // Store OTP with key: otp:email:{email} and otp value in String for TTL minutes
-        redisTemplate.opsForValue().set("otp:id:" + email, String.valueOf(otp), CACHE_TTL, TimeUnit.MINUTES);
-        logger.info("Otp value stored in Redis");
+        redisTemplate.opsForValue().set("otp:email:" + email, String.valueOf(otp), CACHE_TTL, TimeUnit.MINUTES);
+        logger.info("{} otp stored in Redis", otp);
 
         Otp otpMessage = Otp.newBuilder()
                 .setEmail(email)
@@ -61,10 +61,10 @@ public class RedisUtil {
     }
 
     // Validate OTP
-    public boolean verifyOtp(String email, int providedOtp) {
+    public boolean verifyOtp(String email, String providedOtp) {
         String storedOtp = redisTemplate.opsForValue().get("otp:email:" + email);
-
-        return storedOtp != null && storedOtp.equals(String.valueOf(providedOtp));
+        logger.info("got {} for otp:email:{}", storedOtp, email);
+        return storedOtp != null && storedOtp.equals(providedOtp);
     }
 
     // Retrieve frozen user entity after successful OTP validation

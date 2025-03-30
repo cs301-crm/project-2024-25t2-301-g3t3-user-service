@@ -1,11 +1,12 @@
 package com.cs301.crm.controllers;
 
-import com.cs301.crm.dtos.requests.auth.LoginOtpVerificationDTO;
-import com.cs301.crm.dtos.requests.auth.LoginRequestDTO;
-import com.cs301.crm.dtos.requests.auth.ResendOtpRequestDTO;
+import com.cs301.crm.dtos.requests.LoginRequestDTO;
+import com.cs301.crm.dtos.requests.OtpVerificationDTO;
+import com.cs301.crm.dtos.requests.ResendOtpRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
 import com.cs301.crm.exceptions.InvalidTokenException;
 import com.cs301.crm.models.RefreshToken;
+import com.cs301.crm.models.User;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.services.AuthService;
 import com.cs301.crm.services.TokenService;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -47,10 +47,10 @@ public class AuthController {
 
     @PostMapping("/verify-otp")
     public ResponseEntity<GenericResponseDTO> verifyOtp(
-            @RequestBody @Valid LoginOtpVerificationDTO loginOtpVerificationDTO
-    ) throws ExecutionException {
-        GenericResponseDTO response = authService.verifyOtp(loginOtpVerificationDTO);
-        String refreshToken = tokenService.createRefreshToken(loginOtpVerificationDTO.email());
+            @RequestBody @Valid OtpVerificationDTO otpVerificationDTO
+    ) {
+        GenericResponseDTO response = authService.verifyOtp(otpVerificationDTO);
+        String refreshToken = tokenService.createRefreshToken(otpVerificationDTO.email());
 
         List<ResponseCookie> refreshTokenCookies = cookieUtil.buildRefreshToken(refreshToken);
         ResponseCookie accessCookie = cookieUtil.buildAccessToken(response.message());
@@ -68,7 +68,7 @@ public class AuthController {
     @PostMapping("/resend-otp")
     public ResponseEntity<GenericResponseDTO> resendOtp(
             @Valid @RequestBody ResendOtpRequestDTO otpRequestDTO
-    ) throws ExecutionException {
+    ) {
         return ResponseEntity.ok(authService.resendOtp(otpRequestDTO));
     }
 
@@ -101,9 +101,9 @@ public class AuthController {
             throw new InvalidTokenException("Invalid refresh token, please log in again.");
         }
 
-        UserEntity user = refreshToken.getUser();
+        UserEntity userEntity = refreshToken.getUser();
 
-        String accessToken = authService.generateAccessToken(user.getEmail());
+        String accessToken = authService.generateAccessToken(new User(userEntity));
 
         ResponseCookie accessCookie = cookieUtil.buildAccessToken(accessToken);
 

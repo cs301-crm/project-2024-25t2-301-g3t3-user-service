@@ -1,12 +1,14 @@
 package com.cs301.crm.services.impl;
 
-import com.cs301.crm.dtos.requests.auth.LoginOtpVerificationDTO;
-import com.cs301.crm.dtos.requests.auth.LoginRequestDTO;
-import com.cs301.crm.dtos.requests.auth.ResendOtpRequestDTO;
+import com.cs301.crm.dtos.requests.LoginRequestDTO;
+import com.cs301.crm.dtos.requests.OtpVerificationDTO;
+import com.cs301.crm.dtos.requests.ResendOtpRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.exceptions.AccountDisabledException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
-import com.cs301.crm.producers.KafkaProducer;
-import com.cs301.crm.protobuf.Otp;
+import com.cs301.crm.models.User;
+import com.cs301.crm.models.UserEntity;
+import com.cs301.crm.repositories.UserRepository;
 import com.cs301.crm.services.AuthService;
 import com.cs301.crm.utils.JwtUtil;
 import com.cs301.crm.utils.RedisUtil;
@@ -17,12 +19,9 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.concurrent.ExecutionException;
 
 @Service
 public class AuthServiceImpl implements AuthService {
@@ -30,18 +29,18 @@ public class AuthServiceImpl implements AuthService {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
     private final RedisUtil redisUtil;
+    private final UserRepository userRepository;
 
     @Autowired
     public AuthServiceImpl(AuthenticationManager authenticationManager,
                            JwtUtil jwtUtil,
-                           UserDetailsService userDetailsService,
-                           RedisUtil redisUtil) {
+                           RedisUtil redisUtil,
+                           UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
         this.redisUtil = redisUtil;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -50,8 +49,12 @@ public class AuthServiceImpl implements AuthService {
                 new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password())
         );
 
-        if (!(authentication.getPrincipal() instanceof UserDetails)) {
+        if (!(authentication.getPrincipal() instanceof User user)) {
             throw new InvalidUserCredentials("Email or password is incorrect");
+        }
+
+        if (!user.isEnabled()) {
+            throw new AccountDisabledException("Your account is disabled, contact an administrator.");
         }
 
         redisUtil.generateOtp(loginRequestDTO.email());
@@ -62,17 +65,22 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public GenericResponseDTO verifyOtp(LoginOtpVerificationDTO otpVerificationDTO) {
-        if (redisUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
+    public GenericResponseDTO verifyOtp(OtpVerificationDTO otpVerificationDTO) {
+        if (!redisUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
             throw new InvalidUserCredentials("Wrong OTP, please try again");
         }
 
         redisUtil.cleanupAfterSuccessfulVerification(otpVerificationDTO.email());
 
+        UserEntity userEntity = userRepository.findByEmail(otpVerificationDTO.email())
+                .orElseThrow(() -> new InvalidUserCredentials("User does not exist"));
+
         logger.info("{} login successful", otpVerificationDTO.email());
 
         return new GenericResponseDTO(
-                true, this.generateAccessToken(otpVerificationDTO.email()), ZonedDateTime.now()
+                true,
+                this.generateAccessToken(new User(userEntity)),
+                ZonedDateTime.now()
         );
     }
 
@@ -87,7 +95,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public String generateAccessToken(String email) {
-        return jwtUtil.generateToken(userDetailsService.loadUserByUsername(email));
+    public String generateAccessToken(UserDetails userDetails) {
+        return jwtUtil.generateToken(userDetails);
     }
 }
