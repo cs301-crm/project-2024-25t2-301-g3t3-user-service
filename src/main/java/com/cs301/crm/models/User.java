@@ -29,5 +29,5 @@ public class User implements UserDetails {
         return userEntity.getId().toString();
     }
 
-    public String getEmail() { return userEntity.getEmail(); }
+    public boolean isEnabled() { return userEntity.isEnabled(); }
 }
