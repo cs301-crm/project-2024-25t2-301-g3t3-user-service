@@ -1,7 +1,7 @@
 package com.cs301.crm.aspects;
 
 import com.cs301.crm.producers.KafkaProducer;
-import com.cs301.crm.protobuf.Log;
+import com.cs301.shared.protobuf.Log;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;

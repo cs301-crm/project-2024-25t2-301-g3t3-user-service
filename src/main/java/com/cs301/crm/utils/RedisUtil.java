@@ -3,11 +3,12 @@ package com.cs301.crm.utils;
 import com.cs301.crm.exceptions.InvalidOtpException;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.producers.KafkaProducer;
-import com.cs301.crm.protobuf.Otp;
+import com.cs301.shared.protobuf.Otp;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -17,6 +18,9 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class RedisUtil {
 
+    @Value("${otp.expiration}")
+    private Long otpExpiration;
+
     private Logger logger = LoggerFactory.getLogger(RedisUtil.class);
 
     private final StringRedisTemplate redisTemplate;
@@ -24,7 +28,6 @@ public class RedisUtil {
     private final KafkaProducer kafkaProducer;
 
     // TTL constants
-    private static final long CACHE_TTL = 5;
     private static final String OTP_KEY = "otp:email:";
     private static final String PENDING_ACTION_KEY = "pending:email:";
 
@@ -39,11 +42,11 @@ public class RedisUtil {
         final int otp = PasswordUtil.generateOtpValue();
 
         // Store OTP with key: otp:email:{email} and otp value in String for TTL minutes
-        redisTemplate.opsForValue().set(OTP_KEY + email, String.valueOf(otp), CACHE_TTL, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(OTP_KEY + email, String.valueOf(otp), otpExpiration, TimeUnit.SECONDS);
         logger.info("{} otp stored in Redis", otp);
 
         Otp otpMessage = Otp.newBuilder()
-                .setEmail(email)
+                .setUserEmail(email)
                 .setOtp(otp)
                 .setTimestamp(Instant.now().toString())
                 .build();
@@ -58,7 +61,7 @@ public class RedisUtil {
 
         // stringify the userentity
         String userJson = objectMapper.writeValueAsString(userEntity);
-        redisTemplate.opsForValue().set(PENDING_ACTION_KEY + email, userJson, CACHE_TTL, TimeUnit.MINUTES);
+        redisTemplate.opsForValue().set(PENDING_ACTION_KEY + email, userJson, otpExpiration, TimeUnit.SECONDS);
         logger.info("Pending action stored in Redis");
     }
 
