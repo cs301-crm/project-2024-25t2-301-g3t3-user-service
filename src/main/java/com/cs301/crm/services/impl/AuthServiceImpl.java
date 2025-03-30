@@ -44,13 +44,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public GenericResponseDTO login(LoginRequestDTO loginRequestDTO) {
-        Authentication authentication = authenticationManager.authenticate(
+        authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequestDTO.email(), loginRequestDTO.password())
         );
-
-        if (!(authentication.getPrincipal() instanceof User user)) {
-            throw new InvalidUserCredentials("Email or password is incorrect");
-        }
 
         redisUtil.generateOtp(loginRequestDTO.email());
 
