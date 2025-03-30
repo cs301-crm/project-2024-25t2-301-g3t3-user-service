@@ -1,8 +1,6 @@
 package com.cs301.crm.dtos.requests;
 
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 
 public record OtpVerificationDTO(
         @NotNull(message = "Email cannot be null")
@@ -11,6 +9,9 @@ public record OtpVerificationDTO(
         String email,
 
         @NotNull(message = "OTP cannot be null")
-        Integer oneTimePassword
+        @Size(min=6, max=6, message = "OTP must be 6 digits")
+        @Pattern(message = "OTP must only contain numbers",
+                regexp="^[0-9]+$")
+        String oneTimePassword
 ) {
 }
