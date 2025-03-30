@@ -1,10 +1,10 @@
-package com.cs301.crm.dtos.requests.auth;
+package com.cs301.crm.dtos.requests;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
-public record LoginOtpVerificationDTO(
+public record OtpVerificationDTO(
         @NotNull(message = "Email cannot be null")
         @NotEmpty(message = "Email cannot be empty")
         @Email(message = "Invalid email format")
@@ -12,4 +12,5 @@ public record LoginOtpVerificationDTO(
 
         @NotNull(message = "OTP cannot be null")
         Integer oneTimePassword
-) {}
+) {
+}
