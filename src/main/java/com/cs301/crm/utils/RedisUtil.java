@@ -64,12 +64,12 @@ public class RedisUtil {
     public boolean verifyOtp(String email, String providedOtp) {
         String storedOtp = redisTemplate.opsForValue().get("otp:email:" + email);
         logger.info("got {} for otp:email:{}", storedOtp, email);
-        return storedOtp != null && storedOtp.equals(providedOtp);
+        return storedOtp == null || !storedOtp.equals(providedOtp);
     }
 
     // Retrieve frozen user entity after successful OTP validation
     public UserEntity retrievePendingUser(String email) throws JsonProcessingException {
-        String userJson = redisTemplate.opsForValue().get("pending:user:" + email);
+        String userJson = redisTemplate.opsForValue().get("pending:email:" + email);
 
         if (userJson == null) {
             throw new InvalidOtpException("OTP validated on a user that does not exist.");
@@ -80,7 +80,7 @@ public class RedisUtil {
     // Cleanup after successful verification
     public void cleanupAfterSuccessfulVerification(String email) {
         redisTemplate.delete("otp:email:" + email);
-        redisTemplate.delete("pending:user:" + email);
+        redisTemplate.delete("pending:email:" + email);
         logger.info("Successful verification for {}, cleaning up Redis entries", email);
     }
 
