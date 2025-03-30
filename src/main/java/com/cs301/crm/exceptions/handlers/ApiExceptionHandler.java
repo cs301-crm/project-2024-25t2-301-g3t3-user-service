@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.ZonedDateTime;
-import java.util.concurrent.ExecutionException;
 
 @RestControllerAdvice
 public class ApiExceptionHandler {
