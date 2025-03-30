@@ -17,8 +17,8 @@ spring:
     bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
   data:
     redis:
+      database: ${SPRING_REDIS_DATABASE:0}
       host: ${SPRING_REDIS_HOST:localhost}
-      client-name: user-service
       port: ${SPRING_REDIS_PORT:6379}
 
 kafka:
