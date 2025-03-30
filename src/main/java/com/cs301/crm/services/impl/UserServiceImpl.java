@@ -9,7 +9,7 @@ import com.cs301.crm.models.OtpContext;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.models.UserRole;
 import com.cs301.crm.producers.KafkaProducer;
-import com.cs301.crm.protobuf.Notification;
+import com.cs301.shared.protobuf.U2C;
 import com.cs301.crm.repositories.UserRepository;
 import com.cs301.crm.services.UserService;
 import com.cs301.crm.utils.PasswordUtil;
@@ -94,11 +94,11 @@ public class UserServiceImpl implements UserService {
 
         if (OtpContext.valueOf(otpContext.toUpperCase()) == OtpContext.CREATE) {
             // Send notification of account creation to new user
-            Notification notificationMessage = Notification.newBuilder()
-                    .setEmail(userEntity.getEmail())
+            U2C notificationMessage = U2C.newBuilder()
+                    .setUserEmail(userEntity.getEmail())
                     .setUsername(userEntity.getFirstName())
                     .setTempPassword(userEntity.getPassword())
-                    .setRole(userEntity.getUserRole().toString())
+                    .setUserRole(userEntity.getUserRole().toString())
                     .build();
 
             kafkaProducer.produceMessage(notificationMessage);

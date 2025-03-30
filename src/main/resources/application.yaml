@@ -23,9 +23,9 @@ spring:
 
 kafka:
   topic:
-    log: ${KAFKA_LOG_TOPIC:logs}
-    notification: ${KAFKA_NOTIFICATION_TOPIC:notifications}
-    otp: ${KAFKA_OTP_TOPIC:otps}
+    log: ${KAFKA_LOG_TOPIC:log}
+    u2c: ${KAFKA_U2C_TOPIC:u2c}
+    otp: ${KAFKA_OTP_TOPIC:otp}
   schema:
     registry: ${KAFKA_REGISTRY:scrooge-bank-registry}
 

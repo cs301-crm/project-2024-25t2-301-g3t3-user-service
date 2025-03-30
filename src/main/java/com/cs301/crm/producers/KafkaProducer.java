@@ -1,8 +1,8 @@
 package com.cs301.crm.producers;
 
-import com.cs301.crm.protobuf.Log;
-import com.cs301.crm.protobuf.Notification;
-import com.cs301.crm.protobuf.Otp;
+import com.cs301.shared.protobuf.Log;
+import com.cs301.shared.protobuf.U2C;
+import com.cs301.shared.protobuf.Otp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +18,8 @@ public class KafkaProducer {
     @Value("${kafka.topic.log}")
     private String logTopic;
 
-    @Value("${kafka.topic.notification}")
-    private String notificationTopic;
+    @Value("${kafka.topic.u2c}")
+    private String u2cTopic;
 
     @Value("${kafka.topic.otp}")
     private String otpTopic;
@@ -46,13 +46,13 @@ public class KafkaProducer {
         });
     }
     private String getTopic(Object message) {
-        if (message instanceof Notification) {
-            return notificationTopic;
+        if (message instanceof U2C) {
+            return u2cTopic;
         } else if (message instanceof Log) {
             return logTopic;
         } else if (message instanceof Otp) {
             return otpTopic;
         }
-        throw new IllegalArgumentException("Message is not of type notification, log, otp" + message.getClass());
+        throw new IllegalArgumentException("Message is not of type u2c, log, otp" + message.getClass());
     }
 }
