@@ -4,7 +4,6 @@ import com.cs301.crm.dtos.requests.LoginRequestDTO;
 import com.cs301.crm.dtos.requests.OtpVerificationDTO;
 import com.cs301.crm.dtos.requests.ResendOtpRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
-import com.cs301.crm.exceptions.AccountDisabledException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
 import com.cs301.crm.models.User;
 import com.cs301.crm.models.UserEntity;
@@ -51,10 +50,6 @@ public class AuthServiceImpl implements AuthService {
 
         if (!(authentication.getPrincipal() instanceof User user)) {
             throw new InvalidUserCredentials("Email or password is incorrect");
-        }
-
-        if (!user.isEnabled()) {
-            throw new AccountDisabledException("Your account is disabled, contact an administrator.");
         }
 
         redisUtil.generateOtp(loginRequestDTO.email());

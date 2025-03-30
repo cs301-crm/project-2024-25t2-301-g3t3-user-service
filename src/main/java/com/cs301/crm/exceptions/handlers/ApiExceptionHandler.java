@@ -120,7 +120,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(value = {DisabledException.class, AccountDisabledException.class})
+    @ExceptionHandler(value = {DisabledException.class})
     public ResponseEntity<ErrorResponse> handleAccountDisabled(Exception e) {
         return new ResponseEntity<>(
                 new ErrorResponse(false, e.getMessage(),

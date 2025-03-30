@@ -11,7 +11,7 @@ public record OtpVerificationDTO(
         @NotNull(message = "OTP cannot be null")
         @Size(min=6, max=6, message = "OTP must be 6 digits")
         @Pattern(message = "OTP must only contain numbers",
-                regexp="^[0-9]+$")
+                regexp="\\d+$")
         String oneTimePassword
 ) {
 }

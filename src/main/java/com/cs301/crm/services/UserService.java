@@ -2,7 +2,6 @@ package com.cs301.crm.services;
 
 import com.cs301.crm.dtos.requests.*;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
-import com.cs301.crm.models.OtpContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
 public interface UserService {

@@ -29,5 +29,6 @@ public class User implements UserDetails {
         return userEntity.getId().toString();
     }
 
+    @Override
     public boolean isEnabled() { return userEntity.isEnabled(); }
 }
