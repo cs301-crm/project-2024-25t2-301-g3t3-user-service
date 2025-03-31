@@ -29,6 +29,7 @@ public class CookieUtil {
                     .httpOnly(true)
                     .secure(httpsEnabled)
                     .path(path)
+                    .sameSite("None")
                     .maxAge(refreshTokenDurationInSeconds)
                     .build()
             );
@@ -41,6 +42,7 @@ public class CookieUtil {
                 .httpOnly(true)
                 .secure(httpsEnabled)
                 .path("/")
+                .sameSite("None")
                 .maxAge(accessTokenDurationInSeconds)
                 .build();
     }
