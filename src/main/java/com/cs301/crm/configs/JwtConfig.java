@@ -44,7 +44,7 @@ public class JwtConfig {
     }
 
     @Bean
-    public RSAPrivateKey rsaPrivateKey(@Value("${JWT_PRIVATE_KEY}") String privateKeyStr) {
+    public RSAPrivateKey rsaPrivateKey(@Value("${jwt.private.key}") String privateKeyStr) {
         try {
             logger.info("Fetching key from AWS via K8s");
 

@@ -1,88 +1,78 @@
 package com.cs301.crm.services.impl;
 
 import com.cs301.crm.dtos.requests.CreateUserRequestDTO;
-import com.cs301.crm.dtos.requests.ResetPasswordRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
-import com.cs301.crm.mappers.UserEntityMapper;
 import com.cs301.crm.models.UserEntity;
-import com.cs301.crm.models.UserRole;
+import com.cs301.crm.producers.KafkaProducer;
 import com.cs301.crm.repositories.UserRepository;
+import com.cs301.crm.utils.RedisUtil;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
+
     @Mock
     private UserRepository userRepository;
     @Mock
     private PasswordEncoder passwordEncoder;
+    @Mock
+    private KafkaProducer kafkaProducer;
+    @Mock
+    private RedisUtil redisUtil;
+    @Mock
+    private SecurityContext securityContext;
+    @Mock
+    private Authentication authentication;
+    @Mock
+    private Jwt jwt;
 
-    @InjectMocks
     private UserServiceImpl userService;
 
+    @BeforeEach
+    void setUp() {
+        userService = new UserServiceImpl(userRepository, passwordEncoder, kafkaProducer, redisUtil);
+
+        // Setup Security Context
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.getPrincipal()).thenReturn(jwt);
+        SecurityContextHolder.setContext(securityContext);
+    }
+
     @Test
-    void createUser_ValidRequest_Success() {
+    void createUser_ValidRequest_ReturnsSuccessResponse() throws Exception {
         // Arrange
         CreateUserRequestDTO request = new CreateUserRequestDTO(
-                "John", "Doe", "johndoe", "john@example.com",
-                "password", "AGENT"
+                "John",
+                "Doe",
+                "john@example.com",
+                "AGENT"
         );
 
-        UserEntity mappedEntity = new UserEntity();
-        mappedEntity.setFirstName("John");
-        mappedEntity.setLastName("Doe");
-        mappedEntity.setUsername("johndoe");
-        mappedEntity.setEmail("john@example.com");
-        mappedEntity.setPassword("password");
-        mappedEntity.setUserRole(UserRole.AGENT);
-
-        when(passwordEncoder.encode(anyString())).thenReturn("encodedPassword");
-        when(userRepository.save(any(UserEntity.class))).thenReturn(mappedEntity);
+        // Mock JWT claims
+        when(jwt.getClaimAsString("sub")).thenReturn(UUID.randomUUID().toString());
+        when(userRepository.findById(any())).thenReturn(Optional.of(new UserEntity()));
 
         // Act
         GenericResponseDTO response = userService.createUser(request);
 
         // Assert
         assertTrue(response.success());
-        assertEquals("User saved successfully", response.message());
-        verify(userRepository).save(any(UserEntity.class));
-        verify(passwordEncoder).encode(anyString());
-    }
-
-    @Test
-    void resetPassword_ValidRequest_Success() {
-        // Arrange
-        ResetPasswordRequestDTO request = new ResetPasswordRequestDTO(
-                "johndoe", "oldPassword", "newPassword"
-        );
-        UserEntity user = new UserEntity();
-        user.setPassword("encodedOldPassword");
-
-        when(userRepository.findByUsername("johndoe"))
-                .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("oldPassword", "encodedOldPassword"))
-                .thenReturn(true);
-        when(passwordEncoder.encode("newPassword"))
-                .thenReturn("encodedNewPassword");
-
-        // Act
-        GenericResponseDTO response = userService.resetPassword(request);
-
-        // Assert
-        assertTrue(response.success());
-        assertEquals("User password updated successfully", response.message());
-        verify(userRepository).findByUsername("johndoe");
-        verify(passwordEncoder).matches("oldPassword", "encodedOldPassword");
-        verify(passwordEncoder).encode("newPassword");
+        verify(redisUtil).generateOtp(any(), any());
     }
 }
