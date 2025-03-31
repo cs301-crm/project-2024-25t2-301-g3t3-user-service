@@ -2,6 +2,7 @@ package com.cs301.crm.services.impl;
 
 import com.cs301.crm.dtos.requests.*;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.exceptions.InvalidChangeException;
 import com.cs301.crm.exceptions.InvalidOtpException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
 import com.cs301.crm.mappers.UserEntityMapper;
@@ -68,8 +69,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public GenericResponseDTO toggleEnable(DisableEnableRequestDTO disableEnableRequestDTO, boolean enable) throws JsonProcessingException {
-        UserEntity userEntity = userRepository.findByEmail(disableEnableRequestDTO.email()).orElseThrow(
-                () -> new UsernameNotFoundException(disableEnableRequestDTO.email())
+        final String email = disableEnableRequestDTO.email();
+        this.checkIfAccountIsRoot(email);
+
+        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
+                () -> new UsernameNotFoundException(email)
         );
 
         userEntity.setEnabled(enable);
@@ -82,7 +86,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public GenericResponseDTO verifyOtp(OtpVerificationDTO otpVerificationDTO, String otpContext) throws JsonProcessingException {
+    public GenericResponseDTO verifyOtp(DangerousActionOtpVerificationDTO otpVerificationDTO) throws JsonProcessingException {
         if (redisUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
             throw new InvalidOtpException("OTP value is wrong. Please try again");
         }
@@ -92,7 +96,7 @@ public class UserServiceImpl implements UserService {
 
         String result = "";
 
-        if (OtpContext.valueOf(otpContext.toUpperCase()) == OtpContext.CREATE) {
+        if (OtpContext.valueOf(otpVerificationDTO.otpContext().toUpperCase()) == OtpContext.CREATE) {
             // Send notification of account creation to new user
             U2C notificationMessage = U2C.newBuilder()
                     .setUserEmail(userEntity.getEmail())
@@ -107,7 +111,7 @@ public class UserServiceImpl implements UserService {
             userEntity.setEnabled(true);
             userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
             result = "user created successfully";
-        } else if (OtpContext.valueOf(otpContext.toUpperCase()) == OtpContext.UPDATE) {
+        } else if (OtpContext.valueOf(otpVerificationDTO.otpContext().toUpperCase()) == OtpContext.UPDATE) {
             result = "user updated successfully.";
         }
 
@@ -121,12 +125,14 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public GenericResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO) throws JsonProcessingException {
-        UserEntity userEntity = userRepository.findByEmail(updateUserRequestDTO.email()).orElseThrow(
-                () -> new UsernameNotFoundException(updateUserRequestDTO.email())
+        final String email = updateUserRequestDTO.email();
+        this.checkIfAccountIsRoot(email);
+
+        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
+                () -> new UsernameNotFoundException(email)
         );
         userEntity.setFirstName(updateUserRequestDTO.firstName());
         userEntity.setLastName(updateUserRequestDTO.lastName());
-        userEntity.setEmail(updateUserRequestDTO.email());
         userEntity.setUserRole(UserRole.valueOf(updateUserRequestDTO.userRole()));
 
         this.enforceTwoFactorAuthentication(userEntity);
@@ -163,5 +169,11 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException(actorId));
 
         redisUtil.generateOtp(actor.getEmail(), frozenUserEntity);
+    }
+
+    private void checkIfAccountIsRoot(String email) {
+        if (email.equals("root@root.com")) {
+            throw new InvalidChangeException("Not allowed to change information of root user.");
+        }
     }
 }

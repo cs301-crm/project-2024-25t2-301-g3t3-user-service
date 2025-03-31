@@ -47,14 +47,15 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth ->
                 auth
                         .requestMatchers(
-                            "/api/users/enable",
-                            "/api/users/disable",
-                            "/api/users"
+                            "/api/v1/users/enable",
+                            "/api/v1/users/disable",
+                            "/api/v1/users"
                         )
                         .hasAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(
-                                "/api/users/reset-password",
-                                "/api/auth/logout"
+                                "/api/v1/users/reset-password",
+                                "/api/v1/auth/logout",
+                                "/api/v1/users/verify-otp"
                         )
                         .authenticated()
                         .anyRequest()
