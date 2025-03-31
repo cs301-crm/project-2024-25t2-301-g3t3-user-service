@@ -19,8 +19,8 @@ import java.security.interfaces.RSAPublicKey;
 @Configuration
 public class JwtConfig {
 
-    private RSAPrivateKey privateKey;
-    private RSAPublicKey publicKey;
+    private RSAPrivateKey rsaPrivateKey;
+    private RSAPublicKey rsaPublicKey;
     @PostConstruct
     public void init() throws NoSuchAlgorithmException {
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
@@ -29,18 +29,18 @@ public class JwtConfig {
         PrivateKey privateKey = pair.getPrivate();
         PublicKey publicKey = pair.getPublic();
 
-        this.privateKey = (RSAPrivateKey) privateKey;
-        this.publicKey = (RSAPublicKey) publicKey;
+        this.rsaPrivateKey = (RSAPrivateKey) privateKey;
+        this.rsaPublicKey = (RSAPublicKey) publicKey;
     }
 
     @Bean
     public RSAPrivateKey rsaPrivateKey() {
-        return this.privateKey;
+        return this.rsaPrivateKey;
     }
 
     @Bean
     public RSAPublicKey rsaPublicKey() {
-        return this.publicKey;
+        return this.rsaPublicKey;
     }
 
     @Bean
