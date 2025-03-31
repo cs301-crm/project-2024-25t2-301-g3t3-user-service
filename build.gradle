@@ -57,7 +57,6 @@ dependencies {
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation 'org.springframework.security:spring-security-test'
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6'
-    implementation 'org.springframework.security:spring-security'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     // Confluent dependencies
