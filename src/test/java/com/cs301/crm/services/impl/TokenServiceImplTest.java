@@ -1,12 +1,14 @@
 package com.cs301.crm.services.impl;
 
+import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.exceptions.EmailNotFoundException;
 import com.cs301.crm.models.RefreshToken;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.repositories.TokenRepository;
 import com.cs301.crm.repositories.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -15,58 +17,67 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class TokenServiceImplTest {
+
     @Mock
     private TokenRepository tokenRepository;
     @Mock
     private UserRepository userRepository;
 
-    @InjectMocks
     private TokenServiceImpl tokenService;
 
-    @Test
-    void createRefreshToken_ValidUsername_Success() {
-        // Arrange
-        String username = "testUser";
-        UserEntity user = new UserEntity();
-        user.setUsername(username);
+    @BeforeEach
+    void setUp() {
+        tokenService = new TokenServiceImpl(tokenRepository, userRepository);
+    }
 
-        when(userRepository.findByUsername(username))
-                .thenReturn(Optional.of(user));
-        when(tokenRepository.save(any(RefreshToken.class)))
-                .thenAnswer(i -> i.getArgument(0));
+    @Test
+    void createRefreshToken_ValidEmail_ReturnsToken() {
+        // Arrange
+        String email = "test@example.com";
+        UserEntity user = new UserEntity();
+        user.setEmail(email);
+
+        when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+        when(tokenRepository.save(any(RefreshToken.class))).thenAnswer(i -> i.getArguments()[0]);
 
         // Act
-        String token = tokenService.createRefreshToken(username);
+        String token = tokenService.createRefreshToken(email);
 
         // Assert
         assertNotNull(token);
-        verify(userRepository).findByUsername(username);
         verify(tokenRepository).save(any(RefreshToken.class));
     }
 
     @Test
-    void validateRefreshToken_ValidToken_ReturnsRefreshToken() {
+    void createRefreshToken_InvalidEmail_ThrowsException() {
         // Arrange
-        UUID tokenId = UUID.randomUUID();
-        RefreshToken refreshToken = new RefreshToken();
-        refreshToken.setToken(tokenId);
+        String email = "nonexistent@example.com";
+        when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        when(tokenRepository.findByTokenAndExpiresAtAfter(
-                eq(tokenId), any(OffsetDateTime.class)))
+        // Act & Assert
+        assertThrows(EmailNotFoundException.class, () -> tokenService.createRefreshToken(email));
+    }
+
+    @Test
+    void logout_ValidToken_ReturnsSuccessResponse() {
+        // Arrange
+        UUID token = UUID.randomUUID();
+        RefreshToken refreshToken = new RefreshToken();
+        refreshToken.setExpiresAt(OffsetDateTime.now().plusDays(1));
+
+        when(tokenRepository.findByTokenAndExpiresAtAfter(eq(token), any()))
                 .thenReturn(Optional.of(refreshToken));
 
         // Act
-        RefreshToken result = tokenService.validateRefreshToken(tokenId);
+        GenericResponseDTO response = tokenService.logout(token);
 
         // Assert
-        assertNotNull(result);
-        assertEquals(tokenId, result.getToken());
-        verify(tokenRepository).findByTokenAndExpiresAtAfter(
-                eq(tokenId), any(OffsetDateTime.class));
+        assertTrue(response.success());
+        verify(tokenRepository).save(any(RefreshToken.class));
     }
 }
