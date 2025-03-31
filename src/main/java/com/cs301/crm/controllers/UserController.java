@@ -43,13 +43,9 @@ public class UserController {
 
     @PostMapping("/verify-otp")
     public ResponseEntity<GenericResponseDTO> verifyOtp(
-            @RequestBody @Valid OtpVerificationDTO otpVerificationDTO,
-            @RequestParam String otpContext
+            @RequestBody @Valid DangerousActionOtpVerificationDTO otpVerificationDTO
     ) throws JsonProcessingException {
-        if (otpContext == null || otpContext.isEmpty()) {
-            throw new IllegalArgumentException("Invalid OTP context");
-        }
-        return ResponseEntity.ok(userService.verifyOtp(otpVerificationDTO, otpContext));
+        return ResponseEntity.ok(userService.verifyOtp(otpVerificationDTO));
     }
 
 

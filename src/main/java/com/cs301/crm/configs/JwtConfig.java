@@ -2,7 +2,6 @@ package com.cs301.crm.configs;
 
 import com.cs301.crm.exceptions.AwsException;
 import com.cs301.crm.exceptions.JwtCreationException;
-import com.cs301.crm.utils.AwsUtil;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -45,12 +44,9 @@ public class JwtConfig {
     }
 
     @Bean
-    public RSAPrivateKey rsaPrivateKey(AwsUtil awsUtil) {
+    public RSAPrivateKey rsaPrivateKey(@Value("${JWT_PRIVATE_KEY}") String privateKeyStr) {
         try {
-            logger.info("Fetching key from AWS");
-            String privateKeyStr = awsUtil.getValueFromSecretsManager(
-                    "JWTPrivateKey"
-            );
+            logger.info("Fetching key from AWS via K8s");
 
             if (privateKeyStr == null) {
                 throw new AwsException("JWT Private Key not found");

@@ -36,7 +36,7 @@ public class ApiExceptionHandler {
     @ExceptionHandler(value = {UsernameNotFoundException.class})
     public ResponseEntity<ErrorResponse> handleUsernameDoesNotExist(UsernameNotFoundException e) {
         return new ResponseEntity<>(
-                new ErrorResponse(false,"Username " + e.getMessage() + " not found",
+                new ErrorResponse(false,"Email " + e.getMessage() + " not found",
                         HttpStatus.BAD_REQUEST,
                         ZonedDateTime.now()
                 ), HttpStatus.BAD_REQUEST);
@@ -90,7 +90,7 @@ public class ApiExceptionHandler {
                 ), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(value = {Exception.class, AwsException.class, JwtCreationException.class, JsonProcessingException.class})
+    @ExceptionHandler(value = {Exception.class, JwtCreationException.class, JsonProcessingException.class})
     public ResponseEntity<ErrorResponse> handleException() {
         return new ResponseEntity<>(
                 new ErrorResponse(false,"Something went wrong on our end.",
@@ -117,4 +117,12 @@ public class ApiExceptionHandler {
                 ), HttpStatus.UNAUTHORIZED);
     }
 
+    @ExceptionHandler(value = {InvalidChangeException.class})
+    public ResponseEntity<ErrorResponse> handleInvalidChangeToRoot(InvalidChangeException e) {
+        return new ResponseEntity<>(
+                new ErrorResponse(false, e.getMessage(),
+                        HttpStatus.UNAUTHORIZED,
+                        ZonedDateTime.now()
+                ), HttpStatus.UNAUTHORIZED);
+    }
 }

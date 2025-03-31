@@ -7,7 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 public interface UserService {
     GenericResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) throws JsonProcessingException;
     GenericResponseDTO toggleEnable(DisableEnableRequestDTO disableEnableRequestDTO, boolean enable) throws JsonProcessingException;
-    GenericResponseDTO verifyOtp(OtpVerificationDTO otpVerificationDTO, String otpContext) throws JsonProcessingException;
+    GenericResponseDTO verifyOtp(DangerousActionOtpVerificationDTO otpVerificationDTO) throws JsonProcessingException;
     GenericResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO) throws JsonProcessingException;
     GenericResponseDTO resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO);
 }
