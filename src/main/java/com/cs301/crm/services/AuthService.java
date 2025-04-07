@@ -11,4 +11,5 @@ public interface AuthService {
     GenericResponseDTO verifyOtp(OtpVerificationDTO otpVerificationDTO);
     GenericResponseDTO resendOtp(ResendOtpRequestDTO otpRequestDTO);
     String generateAccessToken(UserDetails userDetails);
+    String getJwkSet();
 }

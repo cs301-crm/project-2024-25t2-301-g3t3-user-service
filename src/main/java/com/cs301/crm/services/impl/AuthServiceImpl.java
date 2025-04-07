@@ -11,6 +11,7 @@ import com.cs301.crm.repositories.UserRepository;
 import com.cs301.crm.services.AuthService;
 import com.cs301.crm.utils.JwtUtil;
 import com.cs301.crm.utils.RedisUtil;
+import com.nimbusds.jose.jwk.JWKSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,4 +89,10 @@ public class AuthServiceImpl implements AuthService {
     public String generateAccessToken(UserDetails userDetails) {
         return jwtUtil.generateToken(userDetails);
     }
+
+    @Override
+    public String getJwkSet() {
+        return new JWKSet(jwtUtil.getRSAKey()).toJSONObject().toString();
+    }
+
 }
