@@ -40,7 +40,7 @@ otp:
   expiration: ${OTP_EXPIRATION_TIME:300}
 
 jwt:
-  issuer: ${JWT_ISSUER:http://localhost:8080/api/users}
+  issuer: ${JWT_ISSUER:http://localhost:8080/api/auth}
   id: ${JWT_KEY_ID:6f976ce0-4aad-47d7-a141-b7d40e44ea16}
   private:
     key: ${JWT_PRIVATE_KEY}
