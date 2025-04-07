@@ -13,9 +13,9 @@ RUN chown -R spring:spring /app
 
 USER spring
 
-EXPOSE 8000
+EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=5 \
-    CMD curl -f http://localhost:8000/actuator/health || exit 1
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "user-service.jar"]
