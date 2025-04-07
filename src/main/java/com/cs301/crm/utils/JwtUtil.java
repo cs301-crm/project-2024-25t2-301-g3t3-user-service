@@ -2,10 +2,10 @@ package com.cs301.crm.utils;
 
 import com.cs301.crm.exceptions.JwtCreationException;
 import com.nimbusds.jose.jwk.RSAKey;
-
 import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
-
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +29,9 @@ public class JwtUtil {
     @Value("${jwt.access.duration}")
     private long expirationTime;
 
+    @Value("${jwt.issuer}")
+    private String issuer;
+
     private final RSAKey rsaKey;
 
     private final JwtEncoder jwtEncoder;
@@ -46,24 +49,33 @@ public class JwtUtil {
      * @return a String representation of the signed JWT token (for Bearer)
      */
     public String generateToken(UserDetails userDetails) {
-
         try {
             JwtClaimsSet claimsSet = JwtClaimsSet.builder()
-                    .issuer("crm-auth-service")
-                    .issuedAt(Instant.now())
-                    .expiresAt(Instant.now().plusSeconds(expirationTime))
-                    .subject(userDetails.getUsername())
-                    .claim(
-                            "scope",
-                            userDetails
-                                    .getAuthorities()
-                                    .stream()
-                                    .map(GrantedAuthority::getAuthority)
-                                    .collect(Collectors.joining(" "))
+                .issuer(issuer)
+                .id(UUID.randomUUID().toString())
+                .audience(
+                    List.of(
+                        "crm-client-service",
+                        "crm-user-service",
+                        "crm-comms-service"
                     )
-                    .build();
+                )
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(expirationTime))
+                .subject(userDetails.getUsername())
+                .claim(
+                    "scope",
+                    userDetails
+                        .getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.joining(" "))
+                )
+                .build();
 
-            return jwtEncoder.encode(JwtEncoderParameters.from(claimsSet)).getTokenValue();
+            return jwtEncoder
+                .encode(JwtEncoderParameters.from(claimsSet))
+                .getTokenValue();
         } catch (Exception e) {
             throw new JwtCreationException("Something went wrong", e);
         }
