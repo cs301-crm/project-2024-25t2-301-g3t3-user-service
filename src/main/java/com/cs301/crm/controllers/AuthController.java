@@ -116,4 +116,9 @@ public class AuthController {
                 )
         );
     }
+
+    @GetMapping("/.well-known/jwks.json")
+    public String getJwkSet() {
+        return authService.getJwkSet();
+    }
 }
