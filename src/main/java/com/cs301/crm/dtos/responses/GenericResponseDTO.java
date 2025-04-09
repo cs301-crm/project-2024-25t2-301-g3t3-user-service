@@ -5,7 +5,7 @@ import java.time.ZonedDateTime;
 public record GenericResponseDTO(
         boolean success,
 
-        String message,
+        Object message,
 
         ZonedDateTime timestamp
 ) {}

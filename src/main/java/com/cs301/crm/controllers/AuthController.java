@@ -4,6 +4,7 @@ import com.cs301.crm.dtos.requests.LoginRequestDTO;
 import com.cs301.crm.dtos.requests.OtpVerificationDTO;
 import com.cs301.crm.dtos.requests.ResendOtpRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.dtos.responses.RefreshLoginResponseDTO;
 import com.cs301.crm.exceptions.InvalidTokenException;
 import com.cs301.crm.models.RefreshToken;
 import com.cs301.crm.models.User;
@@ -50,10 +51,11 @@ public class AuthController {
             @RequestBody @Valid OtpVerificationDTO otpVerificationDTO
     ) {
         GenericResponseDTO response = authService.verifyOtp(otpVerificationDTO);
+        RefreshLoginResponseDTO userInfo = (RefreshLoginResponseDTO) response.message();
         String refreshToken = tokenService.createRefreshToken(otpVerificationDTO.email());
 
         List<ResponseCookie> refreshTokenCookies = cookieUtil.buildRefreshToken(refreshToken);
-        ResponseCookie accessCookie = cookieUtil.buildAccessToken(response.message());
+        ResponseCookie accessCookie = cookieUtil.buildAccessToken(userInfo.jwt());
 
         return ResponseEntity.ok()
                 .headers(headers -> {
@@ -111,7 +113,7 @@ public class AuthController {
                 .header(HttpHeaders.SET_COOKIE, accessCookie.toString())
                 .body(
                         new GenericResponseDTO(true,
-                                "Access token refreshed successfully",
+                                authService.buildUserInformationResponse(userEntity),
                         ZonedDateTime.now()
                 )
         );

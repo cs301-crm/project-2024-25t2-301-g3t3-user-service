@@ -4,6 +4,7 @@ import com.cs301.crm.dtos.requests.LoginRequestDTO;
 import com.cs301.crm.dtos.requests.OtpVerificationDTO;
 import com.cs301.crm.dtos.requests.ResendOtpRequestDTO;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.dtos.responses.RefreshLoginResponseDTO;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
 import com.cs301.crm.models.User;
 import com.cs301.crm.models.UserEntity;
@@ -70,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
 
         return new GenericResponseDTO(
                 true,
-                this.generateAccessToken(new User(userEntity)),
+                this.buildUserInformationResponse(userEntity),
                 ZonedDateTime.now()
         );
     }
@@ -93,6 +94,16 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public String getJwkSet() {
         return new JWKSet(jwtUtil.getRSAKey()).toJSONObject().toString();
+    }
+
+
+    public RefreshLoginResponseDTO buildUserInformationResponse(UserEntity userEntity) {
+        return new RefreshLoginResponseDTO(
+                userEntity.getId().toString(),
+                userEntity.getFirstName() + " " + userEntity.getLastName(),
+                userEntity.getUserRole().getAuthority(),
+                this.generateAccessToken(new User(userEntity))
+        );
     }
 
 }
