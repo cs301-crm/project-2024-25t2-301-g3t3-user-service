@@ -22,7 +22,7 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value("${KAFKA_REGISTRY}")
+    @Value("${spring.kafka.producer.properties.schema.registry.url}")
     private String schemaRegistryUrl;
 
     @Bean
