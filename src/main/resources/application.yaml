@@ -49,4 +49,4 @@ jwt:
   refresh:
     duration: ${JWT_REFRESH_DURATION:32400}
   access:
-    duration: ${JWT_EXPIRATION_TIME:99999999}
+    duration: ${JWT_EXPIRATION_TIME:240}
