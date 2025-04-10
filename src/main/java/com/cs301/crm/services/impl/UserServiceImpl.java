@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -47,6 +48,22 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
         this.kafkaProducer = kafkaProducer;
         this.redisUtil = redisUtil;
+    }
+
+    @Override
+    @Transactional
+    public GenericResponseDTO getUsers() {
+        return new GenericResponseDTO(
+                true, userRepository.findAllUsers(), ZonedDateTime.now()
+        );
+    }
+
+    @Override
+    @Transactional
+    public GenericResponseDTO getActiveAgents() {
+        return new GenericResponseDTO(
+                true, userRepository.findAllActiveAgents(), ZonedDateTime.now()
+        );
     }
 
     @Override

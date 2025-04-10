@@ -49,7 +49,8 @@ public class SecurityConfig {
                         .requestMatchers(
                             "/api/v1/users/enable",
                             "/api/v1/users/disable",
-                            "/api/v1/users"
+                            "/api/v1/users",
+                            "/api/v1/users/agents"
                         )
                         .hasAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(
