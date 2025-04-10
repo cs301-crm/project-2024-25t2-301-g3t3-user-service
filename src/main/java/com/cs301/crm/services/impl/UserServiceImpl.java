@@ -60,6 +60,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public GenericResponseDTO getActiveAgents() {
+        return new GenericResponseDTO(
+                true, userRepository.findAllActiveAgents(), ZonedDateTime.now()
+        );
+    }
+
+    @Override
+    @Transactional
     public GenericResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) throws JsonProcessingException {
         // Create the new user
         String tempPassword = PasswordUtil.generatePassword();

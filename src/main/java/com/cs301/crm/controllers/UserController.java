@@ -25,6 +25,11 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsers());
     }
 
+    @GetMapping("/agents")
+    public ResponseEntity<GenericResponseDTO> readAgents() {
+        return ResponseEntity.ok(userService.getActiveAgents());
+    }
+
     @PostMapping
     public ResponseEntity<GenericResponseDTO> create(
             @RequestBody @Valid CreateUserRequestDTO createUserRequestDTO
