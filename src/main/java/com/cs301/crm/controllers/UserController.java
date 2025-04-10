@@ -20,11 +20,23 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public ResponseEntity<GenericResponseDTO> read() {
+        return ResponseEntity.ok(userService.getUsers());
+    }
+
     @PostMapping
     public ResponseEntity<GenericResponseDTO> create(
             @RequestBody @Valid CreateUserRequestDTO createUserRequestDTO
     ) throws JsonProcessingException {
         return new ResponseEntity<>(userService.createUser(createUserRequestDTO), HttpStatus.CREATED);
+    }
+
+    @PutMapping
+    public ResponseEntity<GenericResponseDTO> update(
+            @RequestBody @Valid UpdateUserRequestDTO updateUserRequestDTO
+    ) throws JsonProcessingException {
+        return ResponseEntity.ok(userService.updateUser(updateUserRequestDTO));
     }
 
     @PatchMapping("/disable")
@@ -46,14 +58,6 @@ public class UserController {
             @RequestBody @Valid DangerousActionOtpVerificationDTO otpVerificationDTO
     ) throws JsonProcessingException {
         return ResponseEntity.ok(userService.verifyOtp(otpVerificationDTO));
-    }
-
-
-    @PutMapping
-    public ResponseEntity<GenericResponseDTO> update(
-            @RequestBody @Valid UpdateUserRequestDTO updateUserRequestDTO
-    ) throws JsonProcessingException {
-        return ResponseEntity.ok(userService.updateUser(updateUserRequestDTO));
     }
 
     @PostMapping("/reset-password")
