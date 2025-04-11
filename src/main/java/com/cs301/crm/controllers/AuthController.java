@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -78,8 +80,9 @@ public class AuthController {
     public ResponseEntity<GenericResponseDTO> logout(
             @CookieValue(value="refreshToken", required = false) String refreshTokenId
     ) {
-        List<ResponseCookie> refreshTokenCookies = cookieUtil.buildRefreshToken("destroyedRefresh");
-        ResponseCookie accessCookie = cookieUtil.buildAccessToken("destroyedAccess");
+        List<ResponseCookie> refreshTokenCookies = cookieUtil.buildInvalidRefreshToken(refreshTokenId);
+        Jwt jwt = (Jwt) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        ResponseCookie accessCookie = cookieUtil.buildInvalidAccessToken(jwt.getTokenValue());
 
         return ResponseEntity.ok()
                 .headers(headers -> {

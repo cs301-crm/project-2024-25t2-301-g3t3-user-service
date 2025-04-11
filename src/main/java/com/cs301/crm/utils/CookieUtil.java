@@ -37,6 +37,22 @@ public class CookieUtil {
         return cookies;
     }
 
+    public List<ResponseCookie> buildInvalidRefreshToken(String attributeValue) {
+
+        List<ResponseCookie> cookies = new ArrayList<>();
+        for (String path : cookiePaths) {
+            cookies.add(ResponseCookie.from("refreshToken", attributeValue)
+                            .httpOnly(true)
+                            .secure(httpsEnabled)
+                            .path(path)
+//                    .sameSite("None")
+                            .maxAge(0)
+                            .build()
+            );
+        }
+        return cookies;
+    }
+
     public ResponseCookie buildAccessToken(String attributeValue) {
         return ResponseCookie.from("accessToken", attributeValue)
                 .httpOnly(true)
@@ -44,6 +60,16 @@ public class CookieUtil {
                 .path("/")
 //                .sameSite("None")
                 .maxAge(accessTokenDurationInSeconds)
+                .build();
+    }
+
+    public ResponseCookie buildInvalidAccessToken(String attributeValue) {
+        return ResponseCookie.from("accessToken", attributeValue)
+                .httpOnly(true)
+                .secure(httpsEnabled)
+                .path("/")
+//                .sameSite("None")
+                .maxAge(0)
                 .build();
     }
 }
