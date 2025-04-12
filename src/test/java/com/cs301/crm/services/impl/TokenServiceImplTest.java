@@ -1,7 +1,6 @@
 package com.cs301.crm.services.impl;
 
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
-import com.cs301.crm.exceptions.EmailNotFoundException;
 import com.cs301.crm.models.RefreshToken;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.repositories.TokenRepository;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import java.time.OffsetDateTime;
 import java.util.Optional;
@@ -60,7 +60,7 @@ class TokenServiceImplTest {
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
         // Act & Assert
-        assertThrows(EmailNotFoundException.class, () -> tokenService.createRefreshToken(email));
+        assertThrows(UsernameNotFoundException.class, () -> tokenService.createRefreshToken(email));
     }
 
     @Test

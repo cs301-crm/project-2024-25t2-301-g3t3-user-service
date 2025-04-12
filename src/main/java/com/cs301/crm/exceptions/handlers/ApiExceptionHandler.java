@@ -2,6 +2,7 @@ package com.cs301.crm.exceptions.handlers;
 
 import com.cs301.crm.exceptions.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -78,6 +79,26 @@ public class ApiExceptionHandler {
                         ZonedDateTime.now()
                 ), HttpStatus.UNAUTHORIZED);
     }
+
+    @ExceptionHandler(value = {DataIntegrityViolationException.class})
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation() {
+        return new ResponseEntity<>(
+                new ErrorResponse(false,"This email has been used. Please try another email.",
+                        HttpStatus.BAD_REQUEST,
+                        ZonedDateTime.now()
+                ), HttpStatus.BAD_REQUEST);
+    }
+
+    // This is for if the OTP value is wrong, but OTP correct number does exist in the cache
+    @ExceptionHandler(value = {IdNotFoundException.class})
+    public ResponseEntity<ErrorResponse> handleBadUUID(IdNotFoundException e) {
+        return new ResponseEntity<>(
+                new ErrorResponse(false,e.getMessage(),
+                        HttpStatus.BAD_REQUEST,
+                        ZonedDateTime.now()
+                ), HttpStatus.BAD_REQUEST);
+    }
+
 
 
     @ExceptionHandler(value = {HttpMessageNotReadableException.class, IllegalArgumentException.class})

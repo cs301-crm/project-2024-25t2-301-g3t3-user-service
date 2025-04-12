@@ -1,12 +1,12 @@
 package com.cs301.crm.services.impl;
 
-import com.cs301.crm.exceptions.EmailNotFoundException;
 import com.cs301.crm.models.User;
 import com.cs301.crm.models.UserEntity;
 import com.cs301.crm.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,9 +18,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         this.userRepository = userRepository;
     }
     @Override
-    public UserDetails loadUserByUsername(String email) throws EmailNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserEntity userEntity = userRepository.findByEmail(email)
-                .orElseThrow(() -> new EmailNotFoundException("Email not found:" + email));
+                .orElseThrow(() -> new UsernameNotFoundException(email));
         return new User(userEntity);
     }
 }

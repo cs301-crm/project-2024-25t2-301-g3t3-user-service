@@ -2,6 +2,7 @@ package com.cs301.crm.services.impl;
 
 import com.cs301.crm.dtos.requests.*;
 import com.cs301.crm.dtos.responses.GenericResponseDTO;
+import com.cs301.crm.exceptions.IdNotFoundException;
 import com.cs301.crm.exceptions.InvalidChangeException;
 import com.cs301.crm.exceptions.InvalidOtpException;
 import com.cs301.crm.exceptions.InvalidUserCredentials;
@@ -67,7 +68,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public GenericResponseDTO createUser(CreateUserRequestDTO createUserRequestDTO) throws JsonProcessingException {
         // Create the new user
         String tempPassword = PasswordUtil.generatePassword();
@@ -84,14 +85,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public GenericResponseDTO toggleEnable(DisableEnableRequestDTO disableEnableRequestDTO, boolean enable) throws JsonProcessingException {
         final String email = disableEnableRequestDTO.email();
-        this.checkIfAccountIsRoot(email);
 
         UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
                 () -> new UsernameNotFoundException(email)
         );
+
+        this.checkIfAccountIsRoot(userEntity.getId());
 
         userEntity.setEnabled(enable);
         this.enforceTwoFactorAuthentication(userEntity);
@@ -140,17 +142,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public GenericResponseDTO updateUser(UpdateUserRequestDTO updateUserRequestDTO) throws JsonProcessingException {
-        final String email = updateUserRequestDTO.email();
-        this.checkIfAccountIsRoot(email);
+        final UUID id = UUID.fromString(updateUserRequestDTO.userId());
 
-        UserEntity userEntity = userRepository.findByEmail(email).orElseThrow(
-                () -> new UsernameNotFoundException(email)
+        UserEntity userEntity = userRepository.findById(id).orElseThrow(
+                () -> new IdNotFoundException(updateUserRequestDTO.userId())
         );
+
+        this.checkIfAccountIsRoot(id);
         userEntity.setFirstName(updateUserRequestDTO.firstName());
         userEntity.setLastName(updateUserRequestDTO.lastName());
-        userEntity.setUserRole(UserRole.valueOf(updateUserRequestDTO.userRole()));
+        userEntity.setEmail(updateUserRequestDTO.email());
 
         this.enforceTwoFactorAuthentication(userEntity);
 
@@ -160,6 +163,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public GenericResponseDTO resetPassword(ResetPasswordRequestDTO resetPasswordRequestDTO) {
         UserEntity userEntity = userRepository.findByEmail(resetPasswordRequestDTO.email()).orElseThrow(
                 () -> new UsernameNotFoundException(resetPasswordRequestDTO.email())
@@ -188,8 +192,8 @@ public class UserServiceImpl implements UserService {
         redisUtil.generateOtp(actor.getEmail(), frozenUserEntity);
     }
 
-    private void checkIfAccountIsRoot(String email) {
-        if (email.equals("root@root.com")) {
+    private void checkIfAccountIsRoot(UUID id) {
+        if (id.toString().equals("0818fcb0-ee20-4f67-88b0-a68c21b6be1e")) {
             throw new InvalidChangeException("Not allowed to change information of root user.");
         }
     }
