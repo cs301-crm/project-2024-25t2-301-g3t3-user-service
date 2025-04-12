@@ -48,9 +48,9 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequestDTO));
     }
 
-    @GetMapping("/otp")
+    @GetMapping("/otp/{email}")
     public ResponseEntity<String> getOtp(
-            @RequestParam String email
+            @PathVariable String email
     ) {
         String otp = authService.getOtp(email);
         System.out.println("within /dev/otp");
