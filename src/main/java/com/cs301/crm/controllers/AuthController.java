@@ -48,6 +48,16 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(loginRequestDTO));
     }
 
+    @GetMapping("/otp")
+    public ResponseEntity<String> getOtp(
+            @RequestParam String email
+    ) {
+        String otp = authService.getOtp(email);
+        System.out.println("within /dev/otp");
+        System.out.println("otp: " + otp);
+        return otp != null ? ResponseEntity.ok(otp) : ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/verify-otp")
     public ResponseEntity<GenericResponseDTO> verifyOtp(
             @RequestBody @Valid OtpVerificationDTO otpVerificationDTO
