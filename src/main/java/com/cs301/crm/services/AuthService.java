@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 public interface AuthService {
     GenericResponseDTO login(LoginRequestDTO loginRequestDTO);
+    String getOtp(String email);
     GenericResponseDTO verifyOtp(OtpVerificationDTO otpVerificationDTO);
     GenericResponseDTO resendOtp(ResendOtpRequestDTO otpRequestDTO);
     String generateAccessToken(UserDetails userDetails);

@@ -57,6 +57,13 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public String getOtp(String email) {
+        String otp = redisUtil.getOtp(email);
+        logger.info("otp {} retrieved from api endpoint", otp);
+        return otp;
+    }
+
+    @Override
     public GenericResponseDTO verifyOtp(OtpVerificationDTO otpVerificationDTO) {
         if (redisUtil.verifyOtp(otpVerificationDTO.email(), otpVerificationDTO.oneTimePassword())) {
             throw new InvalidUserCredentials("Wrong OTP, please try again");

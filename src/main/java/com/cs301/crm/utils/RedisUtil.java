@@ -65,6 +65,13 @@ public class RedisUtil {
         logger.info("Pending action stored in Redis");
     }
 
+    // Fetch OTP (for load testing)
+    public String getOtp(String email) {
+        String storedOtp = redisTemplate.opsForValue().get(OTP_KEY + email);
+        logger.info("[TEST] retrieved {} for {}{}", storedOtp, OTP_KEY, email);
+        return storedOtp;
+    }
+
     // Validate OTP
     public boolean verifyOtp(String email, String providedOtp) {
         String storedOtp = redisTemplate.opsForValue().get(OTP_KEY + email);
