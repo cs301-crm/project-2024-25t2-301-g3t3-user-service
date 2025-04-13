@@ -58,7 +58,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String getOtp(String email) {
-        return redisUtil.getOtp(email);
+        String otp = redisUtil.getOtp(email);
+        logger.info("otp {} retrieved from api endpoint", otp);
+        return otp;
     }
 
     @Override

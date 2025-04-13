@@ -53,8 +53,6 @@ public class AuthController {
             @PathVariable String email
     ) {
         String otp = authService.getOtp(email);
-        System.out.println("within /dev/otp");
-        System.out.println("otp: " + otp);
         return otp != null ? ResponseEntity.ok(otp) : ResponseEntity.notFound().build();
     }
 
