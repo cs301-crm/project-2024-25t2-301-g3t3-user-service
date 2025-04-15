@@ -54,7 +54,6 @@ public class SecurityConfig {
                         )
                         .hasAuthority("SCOPE_ROLE_ADMIN")
                         .requestMatchers(
-                                "/api/v1/users/reset-password",
                                 "/api/v1/auth/logout",
                                 "/api/v1/users/verify-otp"
                         )
